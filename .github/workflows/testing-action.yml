@@ -1,0 +1,35 @@
+name: Run Tests
+
+on:
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set Up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          check-latest: true
+
+      - name: Build and Test Backend
+        run: |
+          ./mvnw clean verify  # Build and test the backend
+
+      - name: Set Up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16.17.0'  # You can specify the desired Node.js version
+
+      - name: Install Dependencies and Run Frontend Tests
+        run: |
+          npm install
+          npm test  # Run frontend tests

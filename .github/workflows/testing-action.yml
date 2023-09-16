@@ -27,7 +27,7 @@ jobs:
       - name: Set Up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20'  # You can specify the desired Node.js version
+          node-version: '16.17.0'  # You can specify the desired Node.js version
 
       - name: Install Dependencies and Run Frontend Tests
         run: |

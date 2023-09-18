@@ -10,6 +10,7 @@ import com.mycompany.myapp.IntegrationTest;
 import com.mycompany.myapp.domain.Activity;
 import com.mycompany.myapp.domain.User;
 import com.mycompany.myapp.repository.ActivityRepository;
+import com.mycompany.myapp.web.rest.TestUtil;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -151,14 +152,19 @@ class ActivityResourceIT {
 
         int databaseSizeBeforeCreate = activityRepository.findAll().size();
 
-        // An entity with an existing ID cannot be created, so this API call must fail
         restActivityMockMvc
             .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(activity)))
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isCreated());
 
         // Validate the Activity in the database
         List<Activity> activityList = activityRepository.findAll();
-        assertThat(activityList).hasSize(databaseSizeBeforeCreate);
+        assertThat(activityList).hasSize(databaseSizeBeforeCreate + 1);
+        Activity testActivity = activityList.get(activityList.size() - 1);
+        assertThat(testActivity.getTitle()).isEqualTo(DEFAULT_TITLE);
+        assertThat(testActivity.getDescription()).isEqualTo(DEFAULT_DESCRIPTION);
+        assertThat(testActivity.getAddress()).isEqualTo(DEFAULT_ADDRESS);
+        assertThat(testActivity.getDate()).isEqualTo(DEFAULT_DATE);
+        assertThat(testActivity.getMaximum()).isEqualTo(DEFAULT_MAXIMUM);
     }
 
     @Test

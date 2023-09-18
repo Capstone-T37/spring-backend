@@ -1,7 +1,10 @@
 package com.mycompany.myapp.web.rest;
 
 import com.mycompany.myapp.domain.Activity;
+import com.mycompany.myapp.domain.User;
+import com.mycompany.myapp.dto.CreateActivityDto;
 import com.mycompany.myapp.repository.ActivityRepository;
+import com.mycompany.myapp.service.UserService;
 import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -42,24 +45,41 @@ public class ActivityResource {
 
     private final ActivityRepository activityRepository;
 
-    public ActivityResource(ActivityRepository activityRepository) {
+    private final UserService userService;
+
+    public ActivityResource(ActivityRepository activityRepository, UserService userService) {
         this.activityRepository = activityRepository;
+        this.userService = userService;
     }
 
     /**
      * {@code POST  /activities} : Create a new activity.
      *
-     * @param activity the activity to create.
+     * @param activityDto the activity to create.
      * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new activity, or with status {@code 400 (Bad Request)} if the activity has already an ID.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("/activities")
-    public ResponseEntity<Activity> createActivity(@Valid @RequestBody Activity activity) throws URISyntaxException {
-        log.debug("REST request to save Activity : {}", activity);
-        if (activity.getId() != null) {
-            throw new BadRequestAlertException("A new activity cannot already have an ID", ENTITY_NAME, "idexists");
+    public ResponseEntity<Activity> createActivity(@Valid @RequestBody CreateActivityDto activityDto) throws URISyntaxException {
+        log.debug("REST request to save Activity : {}", activityDto);
+
+        Optional<User> user = userService.getUserWithAuthorities();
+        if (user.isEmpty()) {
+            throw new IllegalCallerException("No user is logged in");
         }
-        Activity result = activityRepository.save(activity);
+
+        Activity result = activityRepository.save(
+            Activity
+                .builder()
+                .title(activityDto.getTitle())
+                .date(activityDto.getDate())
+                .user(user.get())
+                .description(activityDto.getDescription())
+                .maximum(activityDto.getMaximum())
+                .address(activityDto.getAddress())
+                .build()
+        );
+
         return ResponseEntity
             .created(new URI("/api/activities/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))

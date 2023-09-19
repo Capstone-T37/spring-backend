@@ -3,8 +3,10 @@ package com.mycompany.myapp.web.rest;
 import com.mycompany.myapp.domain.Activity;
 import com.mycompany.myapp.domain.User;
 import com.mycompany.myapp.dto.CreateActivityDto;
+import com.mycompany.myapp.dto.GetActivityDto;
 import com.mycompany.myapp.repository.ActivityRepository;
 import com.mycompany.myapp.service.UserService;
+import com.mycompany.myapp.service.mapper.ActivityMapper;
 import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -185,16 +187,16 @@ public class ActivityResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of activities in body.
      */
     @GetMapping("/activities")
-    public ResponseEntity<List<Activity>> getAllActivities(
+    public ResponseEntity<List<GetActivityDto>> getAllActivities(
         @org.springdoc.api.annotations.ParameterObject Pageable pageable,
         @RequestParam(required = false, defaultValue = "false") boolean eagerload
     ) {
         log.debug("REST request to get a page of Activities");
-        Page<Activity> page;
+        Page<GetActivityDto> page;
         if (eagerload) {
-            page = activityRepository.findAllWithEagerRelationships(pageable);
+            page = activityRepository.findAllWithEagerRelationships(pageable).map(ActivityMapper::fromEntity);
         } else {
-            page = activityRepository.findAll(pageable);
+            page = activityRepository.findAll(pageable).map(ActivityMapper::fromEntity);
         }
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());

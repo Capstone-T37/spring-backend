@@ -183,21 +183,17 @@ public class ActivityResource {
      * {@code GET  /activities} : get all the activities.
      *
      * @param pageable the pagination information.
-     * @param eagerload flag to eager load entities from relationships (This is applicable for many-to-many).
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of activities in body.
      */
     @GetMapping("/activities")
-    public ResponseEntity<List<GetActivityDto>> getAllActivities(
-        @org.springdoc.api.annotations.ParameterObject Pageable pageable,
-        @RequestParam(required = false, defaultValue = "false") boolean eagerload
-    ) {
+    public ResponseEntity<List<GetActivityDto>> getAllActivities(@org.springdoc.api.annotations.ParameterObject Pageable pageable) {
         log.debug("REST request to get a page of Activities");
-        Page<GetActivityDto> page;
-        if (eagerload) {
-            page = activityRepository.findAllWithEagerRelationships(pageable).map(ActivityMapper::fromEntity);
-        } else {
-            page = activityRepository.findAll(pageable).map(ActivityMapper::fromEntity);
+        Optional<User> user = userService.getUserWithAuthorities();
+        if (user.isEmpty()) {
+            throw new IllegalCallerException("No user is logged in");
         }
+        Page<GetActivityDto> page;
+        page = activityRepository.findByUserNot(pageable, user.get()).map(ActivityMapper::fromEntity);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }

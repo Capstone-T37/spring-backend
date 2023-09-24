@@ -9,6 +9,11 @@ import { RouterModule } from '@angular/router';
         data: { pageTitle: 'meetupbackendApp.activity.home.title' },
         loadChildren: () => import('./activity/activity.module').then(m => m.ActivityModule),
       },
+      {
+        path: 'meet',
+        data: { pageTitle: 'meetupbackendApp.meet.home.title' },
+        loadChildren: () => import('./meet/meet.module').then(m => m.MeetModule),
+      },
       /* jhipster-needle-add-entity-route - JHipster will add entity modules routes here */
     ]),
   ],

@@ -1,0 +1,36 @@
+<div class="d-flex justify-content-center">
+  <div class="col-8">
+    <div *ngIf="meet">
+      <h2 data-cy="meetDetailsHeading"><span jhiTranslate="meetupbackendApp.meet.detail.title">Meet</span></h2>
+
+      <hr />
+
+      <jhi-alert-error></jhi-alert-error>
+
+      <jhi-alert></jhi-alert>
+
+      <dl class="row-md jh-entity-details">
+        <dt><span jhiTranslate="global.field.id">ID</span></dt>
+        <dd>
+          <span>{{ meet.id }}</span>
+        </dd>
+        <dt><span jhiTranslate="meetupbackendApp.meet.description">Description</span></dt>
+        <dd>
+          <span>{{ meet.description }}</span>
+        </dd>
+        <dt><span jhiTranslate="meetupbackendApp.meet.user">User</span></dt>
+        <dd>
+          <span>{{ meet.user?.login }}</span>
+        </dd>
+      </dl>
+
+      <button type="submit" (click)="previousState()" class="btn btn-info" data-cy="entityDetailsBackButton">
+        <fa-icon icon="arrow-left"></fa-icon>&nbsp;<span jhiTranslate="entity.action.back">Back</span>
+      </button>
+
+      <button type="button" [routerLink]="['/meet', meet.id, 'edit']" class="btn btn-primary">
+        <fa-icon icon="pencil-alt"></fa-icon>&nbsp;<span jhiTranslate="entity.action.edit">Edit</span>
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,25 @@
+{
+  "meetupbackendApp": {
+    "meet": {
+      "home": {
+        "title": "Meets",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "Create a new Meet",
+        "createOrEditLabel": "Create or edit a Meet",
+        "notFound": "No Meets found"
+      },
+      "created": "A new Meet is created with identifier {{ param }}",
+      "updated": "A Meet is updated with identifier {{ param }}",
+      "deleted": "A Meet is deleted with identifier {{ param }}",
+      "delete": {
+        "question": "Are you sure you want to delete Meet {{ id }}?"
+      },
+      "detail": {
+        "title": "Meet"
+      },
+      "id": "ID",
+      "description": "Description",
+      "user": "User"
+    }
+  }
+}

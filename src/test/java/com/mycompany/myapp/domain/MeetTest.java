@@ -10,9 +10,9 @@ class MeetTest {
     @Test
     void equalsVerifier() throws Exception {
         TestUtil.equalsVerifier(Meet.class);
-        Meet meet1 = new Meet();
+        Meet meet1 = Meet.builder().build();
         meet1.setId(1L);
-        Meet meet2 = new Meet();
+        Meet meet2 = Meet.builder().build();
         meet2.setId(meet1.getId());
         assertThat(meet1).isEqualTo(meet2);
         meet2.setId(2L);

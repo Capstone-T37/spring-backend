@@ -1,8 +1,11 @@
 package com.mycompany.myapp.web.rest;
 
 import com.mycompany.myapp.domain.Meet;
+import com.mycompany.myapp.domain.User;
+import com.mycompany.myapp.dto.CreateMeetDto;
 import com.mycompany.myapp.dto.GetMeetDto;
 import com.mycompany.myapp.repository.MeetRepository;
+import com.mycompany.myapp.service.UserService;
 import com.mycompany.myapp.service.mapper.MeetMapper;
 import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
@@ -14,6 +17,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -43,9 +47,11 @@ public class MeetResource {
     private String applicationName;
 
     private final MeetRepository meetRepository;
+    private final UserService userService;
 
-    public MeetResource(MeetRepository meetRepository) {
+    public MeetResource(MeetRepository meetRepository, UserService userService) {
         this.meetRepository = meetRepository;
+        this.userService = userService;
     }
 
     /**
@@ -56,15 +62,18 @@ public class MeetResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("/meets")
-    public ResponseEntity<Meet> createMeet(@Valid @RequestBody Meet meet) throws URISyntaxException {
+    public ResponseEntity<Meet> createMeet(@Valid @RequestBody CreateMeetDto meet) throws URISyntaxException {
         log.debug("REST request to save Meet : {}", meet);
-        if (meet.getId() != null) {
-            throw new BadRequestAlertException("A new meet cannot already have an ID", ENTITY_NAME, "idexists");
+        Optional<User> user = userService.getUserWithAuthorities();
+        if (user.isEmpty()) {
+            throw new IllegalCallerException("No user is logged in");
         }
-        if (meetRepository.findByUserIsCurrentUser().size() > 0) {
+
+        if (meetRepository.findByUser(user.get()).size() > 0) {
             throw new BadRequestAlertException("Only one meet can be active at all times", ENTITY_NAME, "entityExists");
         }
-        Meet result = meetRepository.save(meet);
+
+        Meet result = meetRepository.save(Meet.builder().description(meet.getDescription()).user(user.get()).build());
         return ResponseEntity
             .created(new URI("/api/meets/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))

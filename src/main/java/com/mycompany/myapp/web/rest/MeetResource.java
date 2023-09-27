@@ -61,6 +61,9 @@ public class MeetResource {
         if (meet.getId() != null) {
             throw new BadRequestAlertException("A new meet cannot already have an ID", ENTITY_NAME, "idexists");
         }
+        if (meetRepository.findByUserIsCurrentUser().size() > 0) {
+            throw new BadRequestAlertException("Only one meet can be active at all times", ENTITY_NAME, "entityExists");
+        }
         Meet result = meetRepository.save(meet);
         return ResponseEntity
             .created(new URI("/api/meets/" + result.getId()))

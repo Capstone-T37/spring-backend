@@ -3,12 +3,18 @@ package com.mycompany.myapp.domain;
 import java.io.Serializable;
 import javax.persistence.*;
 import javax.validation.constraints.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 /**
  * A Meet.
  */
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "meet")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)

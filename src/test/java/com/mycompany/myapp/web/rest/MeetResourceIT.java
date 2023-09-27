@@ -22,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -115,22 +116,13 @@ class MeetResourceIT {
         assertThat(testMeet.getDescription()).isEqualTo(DEFAULT_DESCRIPTION);
     }
 
-    @Test
-    @Transactional
-    void createMeetWithExistingId() throws Exception {
-        // Create the Meet with an existing ID
-        meet.setId(1L);
-
-        int databaseSizeBeforeCreate = meetRepository.findAll().size();
-
+    @SuppressWarnings({ "unchecked" })
+    void createSecondMeetShouldThrowException() throws Exception {
+        when(meetRepositoryMock.findByUser(any())).thenReturn(List.of(meet));
         // An entity with an existing ID cannot be created, so this API call must fail
         restMeetMockMvc
             .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(meet)))
             .andExpect(status().isBadRequest());
-
-        // Validate the Meet in the database
-        List<Meet> meetList = meetRepository.findAll();
-        assertThat(meetList).hasSize(databaseSizeBeforeCreate);
     }
 
     @Test

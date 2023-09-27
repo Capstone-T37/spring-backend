@@ -1,6 +1,7 @@
 package com.mycompany.myapp.repository;
 
 import com.mycompany.myapp.domain.Meet;
+import com.mycompany.myapp.domain.User;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -16,6 +17,8 @@ import org.springframework.stereotype.Repository;
 public interface MeetRepository extends JpaRepository<Meet, Long> {
     @Query("select meet from Meet meet where meet.user.login = ?#{principal.username}")
     List<Meet> findByUserIsCurrentUser();
+
+    List<Meet> findByUser(User user);
 
     default Optional<Meet> findOneWithEagerRelationships(Long id) {
         return this.findOneWithToOneRelationships(id);

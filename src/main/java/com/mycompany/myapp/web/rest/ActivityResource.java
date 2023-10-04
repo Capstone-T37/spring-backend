@@ -62,7 +62,7 @@ public class ActivityResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("/activities")
-    public ResponseEntity<Activity> createActivity(@Valid @RequestBody CreateActivityDto activityDto) throws URISyntaxException {
+    public ResponseEntity createActivity(@Valid @RequestBody CreateActivityDto activityDto) throws URISyntaxException {
         log.debug("REST request to save Activity : {}", activityDto);
 
         Optional<User> user = userService.getUserWithAuthorities();
@@ -85,7 +85,7 @@ public class ActivityResource {
         return ResponseEntity
             .created(new URI("/api/activities/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
-            .body(result);
+            .build();
     }
 
     /**

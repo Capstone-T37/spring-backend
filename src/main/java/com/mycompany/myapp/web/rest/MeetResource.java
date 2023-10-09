@@ -6,6 +6,7 @@ import com.mycompany.myapp.dto.CreateMeetDto;
 import com.mycompany.myapp.dto.GetMeetDto;
 import com.mycompany.myapp.repository.MeetRepository;
 import com.mycompany.myapp.service.UserService;
+import com.mycompany.myapp.service.mapper.ActivityMapper;
 import com.mycompany.myapp.service.mapper.MeetMapper;
 import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
@@ -176,6 +177,25 @@ public class MeetResource {
         } else {
             page = meetRepository.findAll(pageable).map(MeetMapper::fromEntity);
         }
+        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
+        return ResponseEntity.ok().headers(headers).body(page.getContent());
+    }
+
+    /**
+     * {@code GET  /meets} : get all the meets.
+     *
+     * @param pageable the pagination information.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of meets in body.
+     */
+    @GetMapping("/meets/exclude-user-meets")
+    public ResponseEntity<List<GetMeetDto>> getAllMeetsUserExcluded(@org.springdoc.api.annotations.ParameterObject Pageable pageable) {
+        log.debug("REST request to get a page of Meets excluding user's meets.");
+        Optional<User> user = userService.getUserWithAuthorities();
+        if (user.isEmpty()) {
+            throw new IllegalCallerException("No user is logged in");
+        }
+        Page<GetMeetDto> page;
+        page = meetRepository.findByUserNot(pageable, user.get()).map(MeetMapper::fromEntity);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }

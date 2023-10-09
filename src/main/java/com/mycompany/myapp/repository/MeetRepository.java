@@ -1,5 +1,6 @@
 package com.mycompany.myapp.repository;
 
+import com.mycompany.myapp.domain.Activity;
 import com.mycompany.myapp.domain.Meet;
 import com.mycompany.myapp.domain.User;
 import java.util.List;
@@ -31,6 +32,8 @@ public interface MeetRepository extends JpaRepository<Meet, Long> {
     default Page<Meet> findAllWithEagerRelationships(Pageable pageable) {
         return this.findAllWithToOneRelationships(pageable);
     }
+
+    Page<Meet> findByUserNot(Pageable pageable, User user);
 
     @Query(
         value = "select distinct meet from Meet meet left join fetch meet.user",

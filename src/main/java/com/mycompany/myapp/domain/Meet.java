@@ -33,6 +33,9 @@ public class Meet implements Serializable {
     @Column(name = "description", nullable = false)
     private String description;
 
+    @Column(name = "is_enabled")
+    private Boolean isEnabled;
+
     @ManyToOne(optional = false)
     @NotNull
     private User user;
@@ -63,6 +66,19 @@ public class Meet implements Serializable {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Boolean getIsEnabled() {
+        return this.isEnabled;
+    }
+
+    public Meet isEnabled(Boolean isEnabled) {
+        this.setIsEnabled(isEnabled);
+        return this;
+    }
+
+    public void setIsEnabled(Boolean isEnabled) {
+        this.isEnabled = isEnabled;
     }
 
     public User getUser() {
@@ -103,6 +119,7 @@ public class Meet implements Serializable {
         return "Meet{" +
             "id=" + getId() +
             ", description='" + getDescription() + "'" +
+            ", isEnabled='" + getIsEnabled() + "'" +
             "}";
     }
 }

@@ -14,11 +14,12 @@ type PartialWithRequiredKeyOf<T extends { id: unknown }> = Partial<Omit<T, 'id'>
  */
 type MeetFormGroupInput = IMeet | PartialWithRequiredKeyOf<NewMeet>;
 
-type MeetFormDefaults = Pick<NewMeet, 'id'>;
+type MeetFormDefaults = Pick<NewMeet, 'id' | 'isEnabled'>;
 
 type MeetFormGroupContent = {
   id: FormControl<IMeet['id'] | NewMeet['id']>;
   description: FormControl<IMeet['description']>;
+  isEnabled: FormControl<IMeet['isEnabled']>;
   user: FormControl<IMeet['user']>;
 };
 
@@ -42,6 +43,7 @@ export class MeetFormService {
       description: new FormControl(meetRawValue.description, {
         validators: [Validators.required],
       }),
+      isEnabled: new FormControl(meetRawValue.isEnabled),
       user: new FormControl(meetRawValue.user, {
         validators: [Validators.required],
       }),
@@ -65,6 +67,7 @@ export class MeetFormService {
   private getFormDefaults(): MeetFormDefaults {
     return {
       id: null,
+      isEnabled: false,
     };
   }
 }

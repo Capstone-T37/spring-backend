@@ -35,6 +35,11 @@
         </div>
 
         <div class="row mb-3">
+          <label class="form-label" jhiTranslate="meetupbackendApp.meet.isEnabled" for="field_isEnabled">Is Enabled</label>
+          <input type="checkbox" class="form-check" name="isEnabled" id="field_isEnabled" data-cy="isEnabled" formControlName="isEnabled" />
+        </div>
+
+        <div class="row mb-3">
           <label class="form-label" jhiTranslate="meetupbackendApp.meet.user" for="field_user">User</label>
           <select class="form-control" id="field_user" data-cy="user" name="user" formControlName="user" [compareWith]="compareUser">
             <option *ngIf="!editForm.get('user')!.value" [ngValue]="null" selected></option>

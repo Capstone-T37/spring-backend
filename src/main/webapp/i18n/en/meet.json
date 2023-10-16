@@ -19,6 +19,7 @@
       },
       "id": "ID",
       "description": "Description",
+      "isEnabled": "Is Enabled",
       "user": "User"
     }
   }

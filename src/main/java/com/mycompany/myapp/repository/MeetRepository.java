@@ -19,6 +19,11 @@ public interface MeetRepository extends JpaRepository<Meet, Long> {
     @Query("select meet from Meet meet where meet.user.login = ?#{principal.username}")
     List<Meet> findByUserIsCurrentUser();
 
+    List<Meet> findByUserAndIsEnabledTrue(User user);
+    Page<Meet> findByUserNotAndIsEnabledTrue(Pageable pageable, User user);
+
+    Optional<Meet> findByIsEnabledTrue();
+
     List<Meet> findByUser(User user);
 
     default Optional<Meet> findOneWithEagerRelationships(Long id) {

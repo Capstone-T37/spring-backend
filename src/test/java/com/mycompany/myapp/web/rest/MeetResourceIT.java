@@ -22,7 +22,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -42,6 +41,9 @@ class MeetResourceIT {
 
     private static final String DEFAULT_DESCRIPTION = "AAAAAAAAAA";
     private static final String UPDATED_DESCRIPTION = "BBBBBBBBBB";
+
+    private static final Boolean DEFAULT_IS_ENABLED = false;
+    private static final Boolean UPDATED_IS_ENABLED = true;
 
     private static final String ENTITY_API_URL = "/api/meets";
     private static final String ENTITY_API_URL_ID = ENTITY_API_URL + "/{id}";
@@ -70,7 +72,7 @@ class MeetResourceIT {
      * if they test an entity which requires the current entity.
      */
     public static Meet createEntity(EntityManager em) {
-        Meet meet = new Meet().description(DEFAULT_DESCRIPTION);
+        Meet meet = new Meet().description(DEFAULT_DESCRIPTION).isEnabled(DEFAULT_IS_ENABLED);
         // Add required entity
         User user = UserResourceIT.createEntity(em);
         em.persist(user);
@@ -86,7 +88,7 @@ class MeetResourceIT {
      * if they test an entity which requires the current entity.
      */
     public static Meet createUpdatedEntity(EntityManager em) {
-        Meet meet = new Meet().description(UPDATED_DESCRIPTION);
+        Meet meet = new Meet().description(UPDATED_DESCRIPTION).isEnabled(UPDATED_IS_ENABLED);
         // Add required entity
         User user = UserResourceIT.createEntity(em);
         em.persist(user);
@@ -114,6 +116,7 @@ class MeetResourceIT {
         assertThat(meetList).hasSize(databaseSizeBeforeCreate + 1);
         Meet testMeet = meetList.get(meetList.size() - 1);
         assertThat(testMeet.getDescription()).isEqualTo(DEFAULT_DESCRIPTION);
+        assertThat(testMeet.getIsEnabled()).isEqualTo(UPDATED_IS_ENABLED);
     }
 
     @SuppressWarnings({ "unchecked" })
@@ -154,7 +157,8 @@ class MeetResourceIT {
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(jsonPath("$.[*].id").value(hasItem(meet.getId().intValue())))
-            .andExpect(jsonPath("$.[*].description").value(hasItem(DEFAULT_DESCRIPTION)));
+            .andExpect(jsonPath("$.[*].description").value(hasItem(DEFAULT_DESCRIPTION)))
+            .andExpect(jsonPath("$.[*].isEnabled").value(hasItem(DEFAULT_IS_ENABLED.booleanValue())));
     }
 
     @SuppressWarnings({ "unchecked" })
@@ -186,7 +190,8 @@ class MeetResourceIT {
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(jsonPath("$.id").value(meet.getId().intValue()))
-            .andExpect(jsonPath("$.description").value(DEFAULT_DESCRIPTION));
+            .andExpect(jsonPath("$.description").value(DEFAULT_DESCRIPTION))
+            .andExpect(jsonPath("$.isEnabled").value(DEFAULT_IS_ENABLED.booleanValue()));
     }
 
     @Test
@@ -208,7 +213,7 @@ class MeetResourceIT {
         Meet updatedMeet = meetRepository.findById(meet.getId()).get();
         // Disconnect from session so that the updates on updatedMeet are not directly saved in db
         em.detach(updatedMeet);
-        updatedMeet.description(UPDATED_DESCRIPTION);
+        updatedMeet.description(UPDATED_DESCRIPTION).isEnabled(UPDATED_IS_ENABLED);
 
         restMeetMockMvc
             .perform(
@@ -223,6 +228,7 @@ class MeetResourceIT {
         assertThat(meetList).hasSize(databaseSizeBeforeUpdate);
         Meet testMeet = meetList.get(meetList.size() - 1);
         assertThat(testMeet.getDescription()).isEqualTo(UPDATED_DESCRIPTION);
+        assertThat(testMeet.getIsEnabled()).isEqualTo(UPDATED_IS_ENABLED);
     }
 
     @Test
@@ -308,6 +314,7 @@ class MeetResourceIT {
         assertThat(meetList).hasSize(databaseSizeBeforeUpdate);
         Meet testMeet = meetList.get(meetList.size() - 1);
         assertThat(testMeet.getDescription()).isEqualTo(UPDATED_DESCRIPTION);
+        assertThat(testMeet.getIsEnabled()).isEqualTo(DEFAULT_IS_ENABLED);
     }
 
     @Test
@@ -322,7 +329,7 @@ class MeetResourceIT {
         Meet partialUpdatedMeet = new Meet();
         partialUpdatedMeet.setId(meet.getId());
 
-        partialUpdatedMeet.description(UPDATED_DESCRIPTION);
+        partialUpdatedMeet.description(UPDATED_DESCRIPTION).isEnabled(UPDATED_IS_ENABLED);
 
         restMeetMockMvc
             .perform(
@@ -337,6 +344,7 @@ class MeetResourceIT {
         assertThat(meetList).hasSize(databaseSizeBeforeUpdate);
         Meet testMeet = meetList.get(meetList.size() - 1);
         assertThat(testMeet.getDescription()).isEqualTo(UPDATED_DESCRIPTION);
+        assertThat(testMeet.getIsEnabled()).isEqualTo(UPDATED_IS_ENABLED);
     }
 
     @Test

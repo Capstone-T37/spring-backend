@@ -9,14 +9,8 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-public class GetMeetDto extends MeetBaseDto {
+public class MeetBaseDto {
 
     @NotNull
-    private Long id;
-
-    @NotNull
-    private String userName;
-
-    @NotNull
-    private Boolean isEnabled;
+    private String description;
 }

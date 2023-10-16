@@ -4,9 +4,9 @@ import com.mycompany.myapp.domain.Meet;
 import com.mycompany.myapp.domain.User;
 import com.mycompany.myapp.dto.CreateMeetDto;
 import com.mycompany.myapp.dto.GetMeetDto;
+import com.mycompany.myapp.dto.MeetBaseDto;
 import com.mycompany.myapp.repository.MeetRepository;
 import com.mycompany.myapp.service.UserService;
-import com.mycompany.myapp.service.mapper.ActivityMapper;
 import com.mycompany.myapp.service.mapper.MeetMapper;
 import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
@@ -18,12 +18,10 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -70,11 +68,11 @@ public class MeetResource {
             throw new IllegalCallerException("No user is logged in");
         }
 
-        if (meetRepository.findByUser(user.get()).size() > 0) {
+        if (meetRepository.findByUserAndIsEnabledTrue(user.get()).size() > 0) {
             throw new BadRequestAlertException("Only one meet can be active at all times", ENTITY_NAME, "entityExists");
         }
 
-        Meet result = meetRepository.save(Meet.builder().description(meet.getDescription()).user(user.get()).build());
+        Meet result = meetRepository.save(Meet.builder().description(meet.getDescription()).user(user.get()).isEnabled(true).build());
         return ResponseEntity
             .created(new URI("/api/meets/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
@@ -147,6 +145,9 @@ public class MeetResource {
                 if (meet.getDescription() != null) {
                     existingMeet.setDescription(meet.getDescription());
                 }
+                if (meet.getIsEnabled() != null) {
+                    existingMeet.setIsEnabled(meet.getIsEnabled());
+                }
 
                 return existingMeet;
             })
@@ -162,21 +163,12 @@ public class MeetResource {
      * {@code GET  /meets} : get all the meets.
      *
      * @param pageable the pagination information.
-     * @param eagerload flag to eager load entities from relationships (This is applicable for many-to-many).
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of meets in body.
      */
     @GetMapping("/meets")
-    public ResponseEntity<List<GetMeetDto>> getAllMeets(
-        @org.springdoc.api.annotations.ParameterObject Pageable pageable,
-        @RequestParam(required = false, defaultValue = "false") boolean eagerload
-    ) {
+    public ResponseEntity<List<GetMeetDto>> getAllMeets(@org.springdoc.api.annotations.ParameterObject Pageable pageable) {
         log.debug("REST request to get a page of Meets");
-        Page<GetMeetDto> page;
-        if (eagerload) {
-            page = meetRepository.findAllWithEagerRelationships(pageable).map(MeetMapper::fromEntity);
-        } else {
-            page = meetRepository.findAll(pageable).map(MeetMapper::fromEntity);
-        }
+        Page<GetMeetDto> page = meetRepository.findAll(pageable).map(MeetMapper::fromEntity);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
@@ -195,7 +187,7 @@ public class MeetResource {
             throw new IllegalCallerException("No user is logged in");
         }
         Page<GetMeetDto> page;
-        page = meetRepository.findByUserNot(pageable, user.get()).map(MeetMapper::fromEntity);
+        page = meetRepository.findByUserNotAndIsEnabledTrue(pageable, user.get()).map(MeetMapper::fromEntity);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
@@ -211,6 +203,39 @@ public class MeetResource {
         log.debug("REST request to get Meet : {}", id);
         Optional<Meet> meet = meetRepository.findOneWithEagerRelationships(id);
         return ResponseUtil.wrapOrNotFound(meet);
+    }
+
+    /**
+     * {@code GET  /meets/isEnabled} : get if a meet is enabled.
+     *
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with true/false, or with status {@code 404 (Not Found)}.
+     */
+    @GetMapping("/meets/isEnabled")
+    public ResponseEntity<MeetBaseDto> getEnabledMeet() {
+        log.debug("REST request to get if Meet is enabled : {}");
+        Optional<Meet> meet = meetRepository.findByIsEnabledTrue();
+        if (meet.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok().body(MeetBaseDto.builder().description(meet.get().getDescription()).build());
+    }
+
+    /**
+     * {@code GET  /meets/disable} : disable enabled meet.
+     *
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with true/false, or with status {@code 404 (Not Found)}.
+     */
+    @GetMapping("/meets/disable")
+    public ResponseEntity<Boolean> disableEnabledMeet() {
+        log.debug("REST request to disable enabled meet : {}");
+        Optional<Meet> meet = meetRepository.findByIsEnabledTrue();
+        if (meet.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        Meet entity = meet.get();
+        entity.setIsEnabled(false);
+        meetRepository.saveAndFlush(entity);
+        return ResponseEntity.ok().body(true);
     }
 
     /**

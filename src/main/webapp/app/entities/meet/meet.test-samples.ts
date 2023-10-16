@@ -6,17 +6,18 @@ export const sampleWithRequiredData: IMeet = {
 };
 
 export const sampleWithPartialData: IMeet = {
-  id: 41395,
-  description: 'Sports virtual',
+  id: 49869,
+  description: 'SMS',
 };
 
 export const sampleWithFullData: IMeet = {
-  id: 80054,
-  description: 'turquoise Functionality',
+  id: 33261,
+  description: 'online',
+  isEnabled: false,
 };
 
 export const sampleWithNewData: NewMeet = {
-  description: 'JBOD Gorgeous Borders',
+  description: 'Functionality Human leading-edge',
   id: null,
 };
 

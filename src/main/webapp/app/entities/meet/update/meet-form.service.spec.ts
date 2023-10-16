@@ -21,6 +21,7 @@ describe('Meet Form Service', () => {
           expect.objectContaining({
             id: expect.any(Object),
             description: expect.any(Object),
+            isEnabled: expect.any(Object),
             user: expect.any(Object),
           })
         );
@@ -33,6 +34,7 @@ describe('Meet Form Service', () => {
           expect.objectContaining({
             id: expect.any(Object),
             description: expect.any(Object),
+            isEnabled: expect.any(Object),
             user: expect.any(Object),
           })
         );

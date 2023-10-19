@@ -213,11 +213,15 @@ public class MeetResource {
     @GetMapping("/meets/isEnabled")
     public ResponseEntity<MeetBaseDto> getEnabledMeet() {
         log.debug("REST request to get if Meet is enabled : {}");
-        Optional<Meet> meet = meetRepository.findByIsEnabledTrue();
+        Optional<User> user = userService.getUserWithAuthorities();
+        if (user.isEmpty()) {
+            throw new IllegalCallerException("No user is logged in");
+        }
+        List<Meet> meet = meetRepository.findByUserAndIsEnabledTrue(user.get());
         if (meet.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok().body(MeetBaseDto.builder().description(meet.get().getDescription()).build());
+        return ResponseEntity.ok().body(MeetBaseDto.builder().description(meet.get(0).getDescription()).build());
     }
 
     /**

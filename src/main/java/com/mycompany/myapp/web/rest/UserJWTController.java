@@ -45,6 +45,11 @@ public class UserJWTController {
         return new ResponseEntity<>(new JWTToken(jwt), httpHeaders, HttpStatus.OK);
     }
 
+    @GetMapping("/validate")
+    public ResponseEntity<JWTToken> validate() {
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
     /**
      * Object to return as body in JWT Authentication.
      */

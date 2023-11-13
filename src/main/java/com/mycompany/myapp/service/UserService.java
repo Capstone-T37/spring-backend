@@ -282,6 +282,11 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
+    public Page<UserDTO> getAllPublicUsersExceptCurrent(Pageable pageable, String login) {
+        return userRepository.findAllByIdNotNullAndActivatedIsTrueAndLoginNot(pageable, login).map(UserDTO::new);
+    }
+
+    @Transactional(readOnly = true)
     public Optional<User> getUserWithAuthoritiesByLogin(String login) {
         return userRepository.findOneWithAuthoritiesByLogin(login);
     }

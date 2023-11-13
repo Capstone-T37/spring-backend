@@ -1,7 +1,12 @@
 package com.mycompany.myapp;
 
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
 import com.mycompany.myapp.config.ApplicationProperties;
 import com.mycompany.myapp.config.CRLFLogConverter;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
@@ -64,7 +69,14 @@ public class MeetupbackendApp {
      *
      * @param args the command line arguments.
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
+        FileInputStream serviceAccount = new FileInputStream("../test.json");
+
+        FirebaseOptions options = new FirebaseOptions.Builder().setCredentials(GoogleCredentials.fromStream(serviceAccount)).build();
+        if (FirebaseApp.getApps().isEmpty()) {
+            FirebaseApp.initializeApp(options);
+        }
+
         SpringApplication app = new SpringApplication(MeetupbackendApp.class);
         DefaultProfileUtil.addDefaultProfile(app);
         Environment env = app.run(args).getEnvironment();

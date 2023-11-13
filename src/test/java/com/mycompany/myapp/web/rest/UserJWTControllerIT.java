@@ -4,16 +4,21 @@ import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.mycompany.myapp.IntegrationTest;
 import com.mycompany.myapp.domain.User;
 import com.mycompany.myapp.repository.UserRepository;
 import com.mycompany.myapp.web.rest.vm.LoginVM;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
@@ -40,48 +45,80 @@ class UserJWTControllerIT {
     @Test
     @Transactional
     void testAuthorize() throws Exception {
-        User user = new User();
-        user.setLogin("user-jwt-controller");
-        user.setEmail("user-jwt-controller@example.com");
-        user.setActivated(true);
-        user.setPassword(passwordEncoder.encode("test"));
+        try (MockedStatic<FirebaseAuth> mockedFirebaseAuth = Mockito.mockStatic(FirebaseAuth.class)) {
+            FirebaseAuth mockFirebaseAuthInstance = mock(FirebaseAuth.class);
 
-        userRepository.saveAndFlush(user);
+            // Mock the static method call
+            mockedFirebaseAuth.when(FirebaseAuth::getInstance).thenReturn(mockFirebaseAuthInstance);
 
-        LoginVM login = new LoginVM();
-        login.setUsername("user-jwt-controller");
-        login.setPassword("test");
-        mockMvc
-            .perform(post("/api/authenticate").contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(login)))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.id_token").isString())
-            .andExpect(jsonPath("$.id_token").isNotEmpty())
-            .andExpect(header().string("Authorization", not(nullValue())))
-            .andExpect(header().string("Authorization", not(is(emptyString()))));
+            // Mock the instance method call
+            when(mockFirebaseAuthInstance.createCustomToken(anyString())).thenReturn("MockedFirebaseToken");
+
+            User user = new User();
+            user.setLogin("user-jwt-controller");
+            user.setEmail("user-jwt-controller@example.com");
+            user.setActivated(true);
+            user.setPassword(passwordEncoder.encode("test"));
+
+            userRepository.saveAndFlush(user);
+
+            LoginVM login = new LoginVM();
+            login.setUsername("user-jwt-controller");
+            login.setPassword("test");
+            mockMvc
+                .perform(
+                    post("/api/authenticate").contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(login))
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id_token").isString())
+                .andExpect(jsonPath("$.id_token").isNotEmpty())
+                .andExpect(header().string("Authorization", not(nullValue())))
+                .andExpect(header().string("Authorization", not(is(emptyString()))));
+
+            // Assertions
+            // Verify interactions
+            verify(mockFirebaseAuthInstance).createCustomToken(anyString());
+        }
     }
 
     @Test
     @Transactional
     void testAuthorizeWithRememberMe() throws Exception {
-        User user = new User();
-        user.setLogin("user-jwt-controller-remember-me");
-        user.setEmail("user-jwt-controller-remember-me@example.com");
-        user.setActivated(true);
-        user.setPassword(passwordEncoder.encode("test"));
+        // Mock FirebaseAuth and its instance
+        try (MockedStatic<FirebaseAuth> mockedFirebaseAuth = Mockito.mockStatic(FirebaseAuth.class)) {
+            FirebaseAuth mockFirebaseAuthInstance = mock(FirebaseAuth.class);
 
-        userRepository.saveAndFlush(user);
+            // Mock the static method call
+            mockedFirebaseAuth.when(FirebaseAuth::getInstance).thenReturn(mockFirebaseAuthInstance);
 
-        LoginVM login = new LoginVM();
-        login.setUsername("user-jwt-controller-remember-me");
-        login.setPassword("test");
-        login.setRememberMe(true);
-        mockMvc
-            .perform(post("/api/authenticate").contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(login)))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.id_token").isString())
-            .andExpect(jsonPath("$.id_token").isNotEmpty())
-            .andExpect(header().string("Authorization", not(nullValue())))
-            .andExpect(header().string("Authorization", not(is(emptyString()))));
+            // Mock the instance method call
+            when(mockFirebaseAuthInstance.createCustomToken(anyString())).thenReturn("MockedFirebaseToken");
+
+            User user = new User();
+            user.setLogin("user-jwt-controller-remember-me");
+            user.setEmail("user-jwt-controller-remember-me@example.com");
+            user.setActivated(true);
+            user.setPassword(passwordEncoder.encode("test"));
+
+            userRepository.saveAndFlush(user);
+
+            LoginVM login = new LoginVM();
+            login.setUsername("user-jwt-controller-remember-me");
+            login.setPassword("test");
+            login.setRememberMe(true);
+            mockMvc
+                .perform(
+                    post("/api/authenticate").contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(login))
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id_token").isString())
+                .andExpect(jsonPath("$.id_token").isNotEmpty())
+                .andExpect(header().string("Authorization", not(nullValue())))
+                .andExpect(header().string("Authorization", not(is(emptyString()))));
+            // Assertions
+            // Verify interactions
+            verify(mockFirebaseAuthInstance).createCustomToken(anyString());
+        }
     }
 
     @Test

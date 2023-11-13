@@ -1,6 +1,8 @@
 package com.mycompany.myapp.web.rest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthException;
 import com.mycompany.myapp.security.jwt.JWTFilter;
 import com.mycompany.myapp.security.jwt.TokenProvider;
 import com.mycompany.myapp.web.rest.vm.LoginVM;
@@ -31,7 +33,7 @@ public class UserJWTController {
     }
 
     @PostMapping("/authenticate")
-    public ResponseEntity<JWTToken> authorize(@Valid @RequestBody LoginVM loginVM) {
+    public ResponseEntity<JWTToken> authorize(@Valid @RequestBody LoginVM loginVM) throws FirebaseAuthException {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
             loginVM.getUsername(),
             loginVM.getPassword()
@@ -42,6 +44,8 @@ public class UserJWTController {
         String jwt = tokenProvider.createToken(authentication, loginVM.isRememberMe());
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add(JWTFilter.AUTHORIZATION_HEADER, "Bearer " + jwt);
+        String firebaseToken = FirebaseAuth.getInstance().createCustomToken(loginVM.getUsername());
+        httpHeaders.add("FirebaseToken", firebaseToken);
         return new ResponseEntity<>(new JWTToken(jwt), httpHeaders, HttpStatus.OK);
     }
 

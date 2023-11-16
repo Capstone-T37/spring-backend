@@ -10,6 +10,7 @@ import com.mycompany.myapp.IntegrationTest;
 import com.mycompany.myapp.domain.Meet;
 import com.mycompany.myapp.domain.Request;
 import com.mycompany.myapp.domain.User;
+import com.mycompany.myapp.dto.CreateRequestDto;
 import com.mycompany.myapp.repository.RequestRepository;
 import java.util.ArrayList;
 import java.util.List;
@@ -82,6 +83,7 @@ class RequestResourceIT {
         } else {
             meet = TestUtil.findAll(em, Meet.class).get(0);
         }
+        meet.setIsEnabled(true);
         request.setMeet(meet);
         return request;
     }
@@ -123,7 +125,11 @@ class RequestResourceIT {
         int databaseSizeBeforeCreate = requestRepository.findAll().size();
         // Create the Request
         restRequestMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(request)))
+            .perform(
+                post(ENTITY_API_URL)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(TestUtil.convertObjectToJsonBytes(request.getMeet().getId()))
+            )
             .andExpect(status().isCreated());
 
         // Validate the Request in the database

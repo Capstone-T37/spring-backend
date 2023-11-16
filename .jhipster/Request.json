@@ -1,0 +1,26 @@
+{
+  "changelogDate": "20231115053540",
+  "fields": [],
+  "name": "Request",
+  "pagination": "pagination",
+  "readOnly": false,
+  "relationships": [
+    {
+      "otherEntityField": "login",
+      "otherEntityName": "user",
+      "otherEntityRelationshipName": "request",
+      "ownerSide": true,
+      "relationshipName": "user",
+      "relationshipType": "many-to-one",
+      "relationshipValidateRules": ["required"]
+    },
+    {
+      "otherEntityField": "id",
+      "otherEntityName": "meet",
+      "relationshipName": "meet",
+      "relationshipType": "many-to-one",
+      "relationshipValidateRules": ["required"]
+    }
+  ],
+  "service": "no"
+}

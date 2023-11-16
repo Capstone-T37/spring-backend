@@ -50,6 +50,7 @@ public class CacheConfiguration {
             createCache(cm, com.mycompany.myapp.domain.User.class.getName() + ".authorities");
             createCache(cm, com.mycompany.myapp.domain.Activity.class.getName());
             createCache(cm, com.mycompany.myapp.domain.Meet.class.getName());
+            createCache(cm, com.mycompany.myapp.domain.Request.class.getName());
             // jhipster-needle-ehcache-add-entry
         };
     }

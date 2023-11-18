@@ -1,6 +1,8 @@
 package com.mycompany.myapp.repository;
 
+import com.mycompany.myapp.domain.Meet;
 import com.mycompany.myapp.domain.Request;
+import com.mycompany.myapp.domain.User;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -29,13 +31,15 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
         return this.findAllWithToOneRelationships(pageable);
     }
 
+    boolean existsByUserAndMeet(User user, Meet meet);
+
     @Query(
-        value = "select r from Request r where r.user.login = :login and r.meet.user.login = :login",
-        countQuery = "select count(r) from Request r where r.user.login = :login and r.meet.user.login = :login"
+        value = "select r from Request r where r.meet.isEnabled = true and  r.meet.user.login = :login",
+        countQuery = "select count(r) from Request r where r.meet.isEnabled = true and r.meet.user.login = :login"
     )
     Page<Request> findRequestsWithMatchingUserLoginInMeet(Pageable pageable, @Param("login") String login);
 
-    @Query("select count(r) from Request r where r.user.login = :login and r.meet.user.login = :login")
+    @Query("select count(r) from Request r where r.meet.isEnabled = true and  r.meet.user.login = :login")
     Long countRequestsWithMatchingUserLoginInMeet(@Param("login") String login);
 
     @Query(

@@ -19,4 +19,7 @@ public class GetMeetDto extends MeetBaseDto {
 
     @NotNull
     private Boolean isEnabled;
+
+    @NotNull
+    private Boolean isRequestSent;
 }

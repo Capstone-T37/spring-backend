@@ -75,7 +75,7 @@ public class RequestResource {
         }
 
         Optional<Meet> meet = meetRepository.findById(request.getMeetId());
-        if (meet.isEmpty() || !meet.get().getIsEnabled()) {
+        if (meet.isEmpty() || !meet.get().getIsEnabled() || meet.get().getUser().equals(user.get())) {
             throw new IllegalCallerException("Invalid meet");
         }
 

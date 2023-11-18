@@ -6,6 +6,7 @@ import com.mycompany.myapp.dto.CreateMeetDto;
 import com.mycompany.myapp.dto.GetMeetDto;
 import com.mycompany.myapp.dto.MeetBaseDto;
 import com.mycompany.myapp.repository.MeetRepository;
+import com.mycompany.myapp.repository.RequestRepository;
 import com.mycompany.myapp.service.UserService;
 import com.mycompany.myapp.service.mapper.MeetMapper;
 import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
@@ -46,11 +47,14 @@ public class MeetResource {
     private String applicationName;
 
     private final MeetRepository meetRepository;
+    private final RequestRepository requestRepository;
+
     private final UserService userService;
 
-    public MeetResource(MeetRepository meetRepository, UserService userService) {
+    public MeetResource(MeetRepository meetRepository, UserService userService, RequestRepository requestRepository) {
         this.meetRepository = meetRepository;
         this.userService = userService;
+        this.requestRepository = requestRepository;
     }
 
     /**
@@ -187,7 +191,7 @@ public class MeetResource {
             throw new IllegalCallerException("No user is logged in");
         }
         Page<GetMeetDto> page;
-        page = meetRepository.findByUserNotAndIsEnabledTrue(pageable, user.get()).map(MeetMapper::fromEntity);
+        page = findAllMeetsWithRequestStatus(pageable, user.get());
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
@@ -256,5 +260,20 @@ public class MeetResource {
             .noContent()
             .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))
             .build();
+    }
+
+    private Page<GetMeetDto> findAllMeetsWithRequestStatus(Pageable pageable, User user) {
+        return meetRepository
+            .findByUserNotAndIsEnabledTrue(pageable, user)
+            .map(meet ->
+                GetMeetDto
+                    .builder()
+                    .id(meet.getId())
+                    .userName(meet.getUser().getLogin())
+                    .description(meet.getDescription())
+                    .isEnabled(meet.getIsEnabled())
+                    .isRequestSent(requestRepository.existsByUserAndMeet(user, meet))
+                    .build()
+            );
     }
 }

@@ -12,18 +12,8 @@
       "fieldValidateRules": ["required"]
     },
     {
-      "fieldName": "address",
-      "fieldType": "String",
-      "fieldValidateRules": ["required"]
-    },
-    {
       "fieldName": "date",
       "fieldType": "Instant",
-      "fieldValidateRules": ["required"]
-    },
-    {
-      "fieldName": "maximum",
-      "fieldType": "Integer",
       "fieldValidateRules": ["required"]
     }
   ],

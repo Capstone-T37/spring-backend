@@ -11,12 +11,10 @@ public class ActivityMapper {
         return GetActivityDto
             .builder()
             .id(activity.getId())
-            .firstName(activity.getUser().getFirstName())
+            .userName(activity.getUser().getLogin())
             .title(activity.getTitle())
             .description(activity.getDescription())
-            .address(activity.getAddress())
             .date(activity.getDate())
-            .maximum(activity.getMaximum())
             .build();
     }
 }

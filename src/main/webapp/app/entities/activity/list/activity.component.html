@@ -50,21 +50,9 @@
               <fa-icon class="p-1" icon="sort"></fa-icon>
             </div>
           </th>
-          <th scope="col" jhiSortBy="address">
-            <div class="d-flex">
-              <span jhiTranslate="meetupbackendApp.activity.address">Address</span>
-              <fa-icon class="p-1" icon="sort"></fa-icon>
-            </div>
-          </th>
           <th scope="col" jhiSortBy="date">
             <div class="d-flex">
               <span jhiTranslate="meetupbackendApp.activity.date">Date</span>
-              <fa-icon class="p-1" icon="sort"></fa-icon>
-            </div>
-          </th>
-          <th scope="col" jhiSortBy="maximum">
-            <div class="d-flex">
-              <span jhiTranslate="meetupbackendApp.activity.maximum">Maximum</span>
               <fa-icon class="p-1" icon="sort"></fa-icon>
             </div>
           </th>
@@ -89,9 +77,7 @@
           </td>
           <td>{{ activity.title }}</td>
           <td>{{ activity.description }}</td>
-          <td>{{ activity.address }}</td>
           <td>{{ activity.date | formatMediumDatetime }}</td>
-          <td>{{ activity.maximum }}</td>
           <td>
             {{ activity.user?.login }}
           </td>

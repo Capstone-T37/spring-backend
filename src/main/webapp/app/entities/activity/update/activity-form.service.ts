@@ -33,9 +33,7 @@ type ActivityFormGroupContent = {
   id: FormControl<ActivityFormRawValue['id'] | NewActivity['id']>;
   title: FormControl<ActivityFormRawValue['title']>;
   description: FormControl<ActivityFormRawValue['description']>;
-  address: FormControl<ActivityFormRawValue['address']>;
   date: FormControl<ActivityFormRawValue['date']>;
-  maximum: FormControl<ActivityFormRawValue['maximum']>;
   user: FormControl<ActivityFormRawValue['user']>;
 };
 
@@ -62,13 +60,7 @@ export class ActivityFormService {
       description: new FormControl(activityRawValue.description, {
         validators: [Validators.required],
       }),
-      address: new FormControl(activityRawValue.address, {
-        validators: [Validators.required],
-      }),
       date: new FormControl(activityRawValue.date, {
-        validators: [Validators.required],
-      }),
-      maximum: new FormControl(activityRawValue.maximum, {
         validators: [Validators.required],
       }),
       user: new FormControl(activityRawValue.user, {

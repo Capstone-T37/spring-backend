@@ -20,11 +20,5 @@ public class CreateActivityDto {
     private String description;
 
     @NotNull
-    private String address;
-
-    @NotNull
     private Instant date;
-
-    @NotNull
-    private Integer maximum;
 }

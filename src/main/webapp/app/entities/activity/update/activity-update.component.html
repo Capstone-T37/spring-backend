@@ -45,20 +45,6 @@
         </div>
 
         <div class="row mb-3">
-          <label class="form-label" jhiTranslate="meetupbackendApp.activity.address" for="field_address">Address</label>
-          <input type="text" class="form-control" name="address" id="field_address" data-cy="address" formControlName="address" />
-          <div *ngIf="editForm.get('address')!.invalid && (editForm.get('address')!.dirty || editForm.get('address')!.touched)">
-            <small
-              class="form-text text-danger"
-              *ngIf="editForm.get('address')?.errors?.required"
-              jhiTranslate="entity.validation.required"
-            >
-              This field is required.
-            </small>
-          </div>
-        </div>
-
-        <div class="row mb-3">
           <label class="form-label" jhiTranslate="meetupbackendApp.activity.date" for="field_date">Date</label>
           <div class="d-flex">
             <input
@@ -81,27 +67,6 @@
               jhiTranslate="entity.validation.datetimelocal"
             >
               This field should be a date and time.
-            </small>
-          </div>
-        </div>
-
-        <div class="row mb-3">
-          <label class="form-label" jhiTranslate="meetupbackendApp.activity.maximum" for="field_maximum">Maximum</label>
-          <input type="number" class="form-control" name="maximum" id="field_maximum" data-cy="maximum" formControlName="maximum" />
-          <div *ngIf="editForm.get('maximum')!.invalid && (editForm.get('maximum')!.dirty || editForm.get('maximum')!.touched)">
-            <small
-              class="form-text text-danger"
-              *ngIf="editForm.get('maximum')?.errors?.required"
-              jhiTranslate="entity.validation.required"
-            >
-              This field is required.
-            </small>
-            <small
-              class="form-text text-danger"
-              [hidden]="!editForm.get('maximum')?.errors?.number"
-              jhiTranslate="entity.validation.number"
-            >
-              This field should be a number.
             </small>
           </div>
         </div>

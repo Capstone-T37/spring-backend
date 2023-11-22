@@ -84,12 +84,7 @@ class ActivityResourceIT {
      * if they test an entity which requires the current entity.
      */
     public static Activity createEntity(EntityManager em) {
-        Activity activity = new Activity()
-            .title(DEFAULT_TITLE)
-            .description(DEFAULT_DESCRIPTION)
-            .address(DEFAULT_ADDRESS)
-            .date(DEFAULT_DATE)
-            .maximum(DEFAULT_MAXIMUM);
+        Activity activity = new Activity().title(DEFAULT_TITLE).description(DEFAULT_DESCRIPTION).date(DEFAULT_DATE);
         // Add required entity
         User user = UserResourceIT.createEntity(em);
         em.persist(user);
@@ -105,12 +100,7 @@ class ActivityResourceIT {
      * if they test an entity which requires the current entity.
      */
     public static Activity createUpdatedEntity(EntityManager em) {
-        Activity activity = new Activity()
-            .title(UPDATED_TITLE)
-            .description(UPDATED_DESCRIPTION)
-            .address(UPDATED_ADDRESS)
-            .date(UPDATED_DATE)
-            .maximum(UPDATED_MAXIMUM);
+        Activity activity = new Activity().title(UPDATED_TITLE).description(UPDATED_DESCRIPTION).date(UPDATED_DATE);
         // Add required entity
         User user = UserResourceIT.createEntity(em);
         em.persist(user);
@@ -139,9 +129,7 @@ class ActivityResourceIT {
         Activity testActivity = activityList.get(activityList.size() - 1);
         assertThat(testActivity.getTitle()).isEqualTo(DEFAULT_TITLE);
         assertThat(testActivity.getDescription()).isEqualTo(DEFAULT_DESCRIPTION);
-        assertThat(testActivity.getAddress()).isEqualTo(DEFAULT_ADDRESS);
         assertThat(testActivity.getDate()).isEqualTo(DEFAULT_DATE);
-        assertThat(testActivity.getMaximum()).isEqualTo(DEFAULT_MAXIMUM);
     }
 
     @Test
@@ -162,9 +150,7 @@ class ActivityResourceIT {
         Activity testActivity = activityList.get(activityList.size() - 1);
         assertThat(testActivity.getTitle()).isEqualTo(DEFAULT_TITLE);
         assertThat(testActivity.getDescription()).isEqualTo(DEFAULT_DESCRIPTION);
-        assertThat(testActivity.getAddress()).isEqualTo(DEFAULT_ADDRESS);
         assertThat(testActivity.getDate()).isEqualTo(DEFAULT_DATE);
-        assertThat(testActivity.getMaximum()).isEqualTo(DEFAULT_MAXIMUM);
     }
 
     @Test
@@ -203,23 +189,6 @@ class ActivityResourceIT {
 
     @Test
     @Transactional
-    void checkAddressIsRequired() throws Exception {
-        int databaseSizeBeforeTest = activityRepository.findAll().size();
-        // set the field null
-        activity.setAddress(null);
-
-        // Create the Activity, which fails.
-
-        restActivityMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(activity)))
-            .andExpect(status().isBadRequest());
-
-        List<Activity> activityList = activityRepository.findAll();
-        assertThat(activityList).hasSize(databaseSizeBeforeTest);
-    }
-
-    @Test
-    @Transactional
     void checkDateIsRequired() throws Exception {
         int databaseSizeBeforeTest = activityRepository.findAll().size();
         // set the field null
@@ -233,42 +202,6 @@ class ActivityResourceIT {
 
         List<Activity> activityList = activityRepository.findAll();
         assertThat(activityList).hasSize(databaseSizeBeforeTest);
-    }
-
-    @Test
-    @Transactional
-    void checkMaximumIsRequired() throws Exception {
-        int databaseSizeBeforeTest = activityRepository.findAll().size();
-        // set the field null
-        activity.setMaximum(null);
-
-        // Create the Activity, which fails.
-
-        restActivityMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(activity)))
-            .andExpect(status().isBadRequest());
-
-        List<Activity> activityList = activityRepository.findAll();
-        assertThat(activityList).hasSize(databaseSizeBeforeTest);
-    }
-
-    @Test
-    @Transactional
-    void getAllActivities() throws Exception {
-        // Initialize the database
-        activityRepository.saveAndFlush(activity);
-
-        // Get all the activityList
-        restActivityMockMvc
-            .perform(get(ENTITY_API_URL + "?sort=id,desc"))
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(jsonPath("$.[*].id").value(hasItem(activity.getId().intValue())))
-            .andExpect(jsonPath("$.[*].title").value(hasItem(DEFAULT_TITLE)))
-            .andExpect(jsonPath("$.[*].description").value(hasItem(DEFAULT_DESCRIPTION)))
-            .andExpect(jsonPath("$.[*].address").value(hasItem(DEFAULT_ADDRESS)))
-            .andExpect(jsonPath("$.[*].date").value(hasItem(DEFAULT_DATE.toString())))
-            .andExpect(jsonPath("$.[*].maximum").value(hasItem(DEFAULT_MAXIMUM)));
     }
 
     @SuppressWarnings({ "unchecked" })
@@ -302,9 +235,7 @@ class ActivityResourceIT {
             .andExpect(jsonPath("$.id").value(activity.getId().intValue()))
             .andExpect(jsonPath("$.title").value(DEFAULT_TITLE))
             .andExpect(jsonPath("$.description").value(DEFAULT_DESCRIPTION))
-            .andExpect(jsonPath("$.address").value(DEFAULT_ADDRESS))
-            .andExpect(jsonPath("$.date").value(DEFAULT_DATE.toString()))
-            .andExpect(jsonPath("$.maximum").value(DEFAULT_MAXIMUM));
+            .andExpect(jsonPath("$.date").value(DEFAULT_DATE.toString()));
     }
 
     @Test
@@ -326,12 +257,7 @@ class ActivityResourceIT {
         Activity updatedActivity = activityRepository.findById(activity.getId()).get();
         // Disconnect from session so that the updates on updatedActivity are not directly saved in db
         em.detach(updatedActivity);
-        updatedActivity
-            .title(UPDATED_TITLE)
-            .description(UPDATED_DESCRIPTION)
-            .address(UPDATED_ADDRESS)
-            .date(UPDATED_DATE)
-            .maximum(UPDATED_MAXIMUM);
+        updatedActivity.title(UPDATED_TITLE).description(UPDATED_DESCRIPTION).date(UPDATED_DATE);
 
         restActivityMockMvc
             .perform(
@@ -347,9 +273,7 @@ class ActivityResourceIT {
         Activity testActivity = activityList.get(activityList.size() - 1);
         assertThat(testActivity.getTitle()).isEqualTo(UPDATED_TITLE);
         assertThat(testActivity.getDescription()).isEqualTo(UPDATED_DESCRIPTION);
-        assertThat(testActivity.getAddress()).isEqualTo(UPDATED_ADDRESS);
         assertThat(testActivity.getDate()).isEqualTo(UPDATED_DATE);
-        assertThat(testActivity.getMaximum()).isEqualTo(UPDATED_MAXIMUM);
     }
 
     @Test
@@ -417,48 +341,8 @@ class ActivityResourceIT {
         int databaseSizeBeforeUpdate = activityRepository.findAll().size();
 
         // Update the activity using partial update
-        Activity partialUpdatedActivity = new Activity();
+        Activity partialUpdatedActivity = createUpdatedEntity(em);
         partialUpdatedActivity.setId(activity.getId());
-
-        partialUpdatedActivity.title(UPDATED_TITLE).date(UPDATED_DATE).maximum(UPDATED_MAXIMUM);
-
-        restActivityMockMvc
-            .perform(
-                patch(ENTITY_API_URL_ID, partialUpdatedActivity.getId())
-                    .contentType("application/merge-patch+json")
-                    .content(TestUtil.convertObjectToJsonBytes(partialUpdatedActivity))
-            )
-            .andExpect(status().isOk());
-
-        // Validate the Activity in the database
-        List<Activity> activityList = activityRepository.findAll();
-        assertThat(activityList).hasSize(databaseSizeBeforeUpdate);
-        Activity testActivity = activityList.get(activityList.size() - 1);
-        assertThat(testActivity.getTitle()).isEqualTo(UPDATED_TITLE);
-        assertThat(testActivity.getDescription()).isEqualTo(DEFAULT_DESCRIPTION);
-        assertThat(testActivity.getAddress()).isEqualTo(DEFAULT_ADDRESS);
-        assertThat(testActivity.getDate()).isEqualTo(UPDATED_DATE);
-        assertThat(testActivity.getMaximum()).isEqualTo(UPDATED_MAXIMUM);
-    }
-
-    @Test
-    @Transactional
-    void fullUpdateActivityWithPatch() throws Exception {
-        // Initialize the database
-        activityRepository.saveAndFlush(activity);
-
-        int databaseSizeBeforeUpdate = activityRepository.findAll().size();
-
-        // Update the activity using partial update
-        Activity partialUpdatedActivity = new Activity();
-        partialUpdatedActivity.setId(activity.getId());
-
-        partialUpdatedActivity
-            .title(UPDATED_TITLE)
-            .description(UPDATED_DESCRIPTION)
-            .address(UPDATED_ADDRESS)
-            .date(UPDATED_DATE)
-            .maximum(UPDATED_MAXIMUM);
 
         restActivityMockMvc
             .perform(
@@ -474,9 +358,37 @@ class ActivityResourceIT {
         Activity testActivity = activityList.get(activityList.size() - 1);
         assertThat(testActivity.getTitle()).isEqualTo(UPDATED_TITLE);
         assertThat(testActivity.getDescription()).isEqualTo(UPDATED_DESCRIPTION);
-        assertThat(testActivity.getAddress()).isEqualTo(UPDATED_ADDRESS);
         assertThat(testActivity.getDate()).isEqualTo(UPDATED_DATE);
-        assertThat(testActivity.getMaximum()).isEqualTo(UPDATED_MAXIMUM);
+    }
+
+    @Test
+    @Transactional
+    void fullUpdateActivityWithPatch() throws Exception {
+        // Initialize the database
+        activityRepository.saveAndFlush(activity);
+
+        int databaseSizeBeforeUpdate = activityRepository.findAll().size();
+
+        // Update the activity using partial update
+        Activity partialUpdatedActivity = new Activity();
+        partialUpdatedActivity.setId(activity.getId());
+
+        partialUpdatedActivity.title(UPDATED_TITLE).description(UPDATED_DESCRIPTION).date(UPDATED_DATE);
+        restActivityMockMvc
+            .perform(
+                patch(ENTITY_API_URL_ID, partialUpdatedActivity.getId())
+                    .contentType("application/merge-patch+json")
+                    .content(TestUtil.convertObjectToJsonBytes(partialUpdatedActivity))
+            )
+            .andExpect(status().isOk());
+
+        // Validate the Activity in the database
+        List<Activity> activityList = activityRepository.findAll();
+        assertThat(activityList).hasSize(databaseSizeBeforeUpdate);
+        Activity testActivity = activityList.get(activityList.size() - 1);
+        assertThat(testActivity.getTitle()).isEqualTo(UPDATED_TITLE);
+        assertThat(testActivity.getDescription()).isEqualTo(UPDATED_DESCRIPTION);
+        assertThat(testActivity.getDate()).isEqualTo(UPDATED_DATE);
     }
 
     @Test

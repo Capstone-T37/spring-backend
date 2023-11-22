@@ -5,9 +5,7 @@ export interface IActivity {
   id: number;
   title?: string | null;
   description?: string | null;
-  address?: string | null;
   date?: dayjs.Dayjs | null;
-  maximum?: number | null;
   user?: Pick<IUser, 'id' | 'login'> | null;
 }
 

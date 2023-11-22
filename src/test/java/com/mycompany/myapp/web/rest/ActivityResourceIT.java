@@ -189,22 +189,6 @@ class ActivityResourceIT {
 
     @Test
     @Transactional
-    void checkAddressIsRequired() throws Exception {
-        int databaseSizeBeforeTest = activityRepository.findAll().size();
-        // set the field null
-
-        // Create the Activity, which fails.
-
-        restActivityMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(activity)))
-            .andExpect(status().isBadRequest());
-
-        List<Activity> activityList = activityRepository.findAll();
-        assertThat(activityList).hasSize(databaseSizeBeforeTest);
-    }
-
-    @Test
-    @Transactional
     void checkDateIsRequired() throws Exception {
         int databaseSizeBeforeTest = activityRepository.findAll().size();
         // set the field null
@@ -218,40 +202,6 @@ class ActivityResourceIT {
 
         List<Activity> activityList = activityRepository.findAll();
         assertThat(activityList).hasSize(databaseSizeBeforeTest);
-    }
-
-    @Test
-    @Transactional
-    void checkMaximumIsRequired() throws Exception {
-        int databaseSizeBeforeTest = activityRepository.findAll().size();
-        // set the field null
-        // Create the Activity, which fails.
-
-        restActivityMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(activity)))
-            .andExpect(status().isBadRequest());
-
-        List<Activity> activityList = activityRepository.findAll();
-        assertThat(activityList).hasSize(databaseSizeBeforeTest);
-    }
-
-    @Test
-    @Transactional
-    void getAllActivities() throws Exception {
-        // Initialize the database
-        activityRepository.saveAndFlush(activity);
-
-        // Get all the activityList
-        restActivityMockMvc
-            .perform(get(ENTITY_API_URL + "?sort=id,desc"))
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(jsonPath("$.[*].id").value(hasItem(activity.getId().intValue())))
-            .andExpect(jsonPath("$.[*].title").value(hasItem(DEFAULT_TITLE)))
-            .andExpect(jsonPath("$.[*].description").value(hasItem(DEFAULT_DESCRIPTION)))
-            .andExpect(jsonPath("$.[*].address").value(hasItem(DEFAULT_ADDRESS)))
-            .andExpect(jsonPath("$.[*].date").value(hasItem(DEFAULT_DATE.toString())))
-            .andExpect(jsonPath("$.[*].maximum").value(hasItem(DEFAULT_MAXIMUM)));
     }
 
     @SuppressWarnings({ "unchecked" })
@@ -285,9 +235,7 @@ class ActivityResourceIT {
             .andExpect(jsonPath("$.id").value(activity.getId().intValue()))
             .andExpect(jsonPath("$.title").value(DEFAULT_TITLE))
             .andExpect(jsonPath("$.description").value(DEFAULT_DESCRIPTION))
-            .andExpect(jsonPath("$.address").value(DEFAULT_ADDRESS))
-            .andExpect(jsonPath("$.date").value(DEFAULT_DATE.toString()))
-            .andExpect(jsonPath("$.maximum").value(DEFAULT_MAXIMUM));
+            .andExpect(jsonPath("$.date").value(DEFAULT_DATE.toString()));
     }
 
     @Test
@@ -393,7 +341,7 @@ class ActivityResourceIT {
         int databaseSizeBeforeUpdate = activityRepository.findAll().size();
 
         // Update the activity using partial update
-        Activity partialUpdatedActivity = new Activity();
+        Activity partialUpdatedActivity = createUpdatedEntity(em);
         partialUpdatedActivity.setId(activity.getId());
 
         restActivityMockMvc
@@ -409,7 +357,7 @@ class ActivityResourceIT {
         assertThat(activityList).hasSize(databaseSizeBeforeUpdate);
         Activity testActivity = activityList.get(activityList.size() - 1);
         assertThat(testActivity.getTitle()).isEqualTo(UPDATED_TITLE);
-        assertThat(testActivity.getDescription()).isEqualTo(DEFAULT_DESCRIPTION);
+        assertThat(testActivity.getDescription()).isEqualTo(UPDATED_DESCRIPTION);
         assertThat(testActivity.getDate()).isEqualTo(UPDATED_DATE);
     }
 

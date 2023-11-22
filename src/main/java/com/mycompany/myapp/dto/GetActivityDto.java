@@ -17,7 +17,7 @@ public class GetActivityDto {
     private Long id;
 
     @NotNull
-    private String firstName;
+    private String userName;
 
     @NotNull
     private String title;
@@ -26,11 +26,5 @@ public class GetActivityDto {
     private String description;
 
     @NotNull
-    private String address;
-
-    @NotNull
     private Instant date;
-
-    @NotNull
-    private Integer maximum;
 }

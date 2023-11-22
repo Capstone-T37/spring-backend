@@ -39,16 +39,8 @@ public class Activity implements Serializable {
     private String description;
 
     @NotNull
-    @Column(name = "address", nullable = false)
-    private String address;
-
-    @NotNull
     @Column(name = "date", nullable = false)
     private Instant date;
-
-    @NotNull
-    @Column(name = "maximum", nullable = false)
-    private Integer maximum;
 
     @ManyToOne(optional = false)
     @NotNull
@@ -95,19 +87,6 @@ public class Activity implements Serializable {
         this.description = description;
     }
 
-    public String getAddress() {
-        return this.address;
-    }
-
-    public Activity address(String address) {
-        this.setAddress(address);
-        return this;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
     public Instant getDate() {
         return this.date;
     }
@@ -119,19 +98,6 @@ public class Activity implements Serializable {
 
     public void setDate(Instant date) {
         this.date = date;
-    }
-
-    public Integer getMaximum() {
-        return this.maximum;
-    }
-
-    public Activity maximum(Integer maximum) {
-        this.setMaximum(maximum);
-        return this;
-    }
-
-    public void setMaximum(Integer maximum) {
-        this.maximum = maximum;
     }
 
     public User getUser() {
@@ -173,9 +139,7 @@ public class Activity implements Serializable {
             "id=" + getId() +
             ", title='" + getTitle() + "'" +
             ", description='" + getDescription() + "'" +
-            ", address='" + getAddress() + "'" +
             ", date='" + getDate() + "'" +
-            ", maximum=" + getMaximum() +
             "}";
     }
 }

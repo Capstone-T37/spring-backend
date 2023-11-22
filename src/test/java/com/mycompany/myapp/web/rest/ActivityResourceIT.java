@@ -84,12 +84,7 @@ class ActivityResourceIT {
      * if they test an entity which requires the current entity.
      */
     public static Activity createEntity(EntityManager em) {
-        Activity activity = new Activity()
-            .title(DEFAULT_TITLE)
-            .description(DEFAULT_DESCRIPTION)
-            .address(DEFAULT_ADDRESS)
-            .date(DEFAULT_DATE)
-            .maximum(DEFAULT_MAXIMUM);
+        Activity activity = new Activity().title(DEFAULT_TITLE).description(DEFAULT_DESCRIPTION).date(DEFAULT_DATE);
         // Add required entity
         User user = UserResourceIT.createEntity(em);
         em.persist(user);
@@ -105,12 +100,7 @@ class ActivityResourceIT {
      * if they test an entity which requires the current entity.
      */
     public static Activity createUpdatedEntity(EntityManager em) {
-        Activity activity = new Activity()
-            .title(UPDATED_TITLE)
-            .description(UPDATED_DESCRIPTION)
-            .address(UPDATED_ADDRESS)
-            .date(UPDATED_DATE)
-            .maximum(UPDATED_MAXIMUM);
+        Activity activity = new Activity().title(UPDATED_TITLE).description(UPDATED_DESCRIPTION).date(UPDATED_DATE);
         // Add required entity
         User user = UserResourceIT.createEntity(em);
         em.persist(user);
@@ -139,9 +129,7 @@ class ActivityResourceIT {
         Activity testActivity = activityList.get(activityList.size() - 1);
         assertThat(testActivity.getTitle()).isEqualTo(DEFAULT_TITLE);
         assertThat(testActivity.getDescription()).isEqualTo(DEFAULT_DESCRIPTION);
-        assertThat(testActivity.getAddress()).isEqualTo(DEFAULT_ADDRESS);
         assertThat(testActivity.getDate()).isEqualTo(DEFAULT_DATE);
-        assertThat(testActivity.getMaximum()).isEqualTo(DEFAULT_MAXIMUM);
     }
 
     @Test
@@ -162,9 +150,7 @@ class ActivityResourceIT {
         Activity testActivity = activityList.get(activityList.size() - 1);
         assertThat(testActivity.getTitle()).isEqualTo(DEFAULT_TITLE);
         assertThat(testActivity.getDescription()).isEqualTo(DEFAULT_DESCRIPTION);
-        assertThat(testActivity.getAddress()).isEqualTo(DEFAULT_ADDRESS);
         assertThat(testActivity.getDate()).isEqualTo(DEFAULT_DATE);
-        assertThat(testActivity.getMaximum()).isEqualTo(DEFAULT_MAXIMUM);
     }
 
     @Test
@@ -206,7 +192,6 @@ class ActivityResourceIT {
     void checkAddressIsRequired() throws Exception {
         int databaseSizeBeforeTest = activityRepository.findAll().size();
         // set the field null
-        activity.setAddress(null);
 
         // Create the Activity, which fails.
 
@@ -240,8 +225,6 @@ class ActivityResourceIT {
     void checkMaximumIsRequired() throws Exception {
         int databaseSizeBeforeTest = activityRepository.findAll().size();
         // set the field null
-        activity.setMaximum(null);
-
         // Create the Activity, which fails.
 
         restActivityMockMvc
@@ -326,12 +309,7 @@ class ActivityResourceIT {
         Activity updatedActivity = activityRepository.findById(activity.getId()).get();
         // Disconnect from session so that the updates on updatedActivity are not directly saved in db
         em.detach(updatedActivity);
-        updatedActivity
-            .title(UPDATED_TITLE)
-            .description(UPDATED_DESCRIPTION)
-            .address(UPDATED_ADDRESS)
-            .date(UPDATED_DATE)
-            .maximum(UPDATED_MAXIMUM);
+        updatedActivity.title(UPDATED_TITLE).description(UPDATED_DESCRIPTION).date(UPDATED_DATE);
 
         restActivityMockMvc
             .perform(
@@ -347,9 +325,7 @@ class ActivityResourceIT {
         Activity testActivity = activityList.get(activityList.size() - 1);
         assertThat(testActivity.getTitle()).isEqualTo(UPDATED_TITLE);
         assertThat(testActivity.getDescription()).isEqualTo(UPDATED_DESCRIPTION);
-        assertThat(testActivity.getAddress()).isEqualTo(UPDATED_ADDRESS);
         assertThat(testActivity.getDate()).isEqualTo(UPDATED_DATE);
-        assertThat(testActivity.getMaximum()).isEqualTo(UPDATED_MAXIMUM);
     }
 
     @Test
@@ -420,8 +396,6 @@ class ActivityResourceIT {
         Activity partialUpdatedActivity = new Activity();
         partialUpdatedActivity.setId(activity.getId());
 
-        partialUpdatedActivity.title(UPDATED_TITLE).date(UPDATED_DATE).maximum(UPDATED_MAXIMUM);
-
         restActivityMockMvc
             .perform(
                 patch(ENTITY_API_URL_ID, partialUpdatedActivity.getId())
@@ -436,9 +410,7 @@ class ActivityResourceIT {
         Activity testActivity = activityList.get(activityList.size() - 1);
         assertThat(testActivity.getTitle()).isEqualTo(UPDATED_TITLE);
         assertThat(testActivity.getDescription()).isEqualTo(DEFAULT_DESCRIPTION);
-        assertThat(testActivity.getAddress()).isEqualTo(DEFAULT_ADDRESS);
         assertThat(testActivity.getDate()).isEqualTo(UPDATED_DATE);
-        assertThat(testActivity.getMaximum()).isEqualTo(UPDATED_MAXIMUM);
     }
 
     @Test
@@ -453,13 +425,7 @@ class ActivityResourceIT {
         Activity partialUpdatedActivity = new Activity();
         partialUpdatedActivity.setId(activity.getId());
 
-        partialUpdatedActivity
-            .title(UPDATED_TITLE)
-            .description(UPDATED_DESCRIPTION)
-            .address(UPDATED_ADDRESS)
-            .date(UPDATED_DATE)
-            .maximum(UPDATED_MAXIMUM);
-
+        partialUpdatedActivity.title(UPDATED_TITLE).description(UPDATED_DESCRIPTION).date(UPDATED_DATE);
         restActivityMockMvc
             .perform(
                 patch(ENTITY_API_URL_ID, partialUpdatedActivity.getId())
@@ -474,9 +440,7 @@ class ActivityResourceIT {
         Activity testActivity = activityList.get(activityList.size() - 1);
         assertThat(testActivity.getTitle()).isEqualTo(UPDATED_TITLE);
         assertThat(testActivity.getDescription()).isEqualTo(UPDATED_DESCRIPTION);
-        assertThat(testActivity.getAddress()).isEqualTo(UPDATED_ADDRESS);
         assertThat(testActivity.getDate()).isEqualTo(UPDATED_DATE);
-        assertThat(testActivity.getMaximum()).isEqualTo(UPDATED_MAXIMUM);
     }
 
     @Test

@@ -6,35 +6,27 @@ export const sampleWithRequiredData: IActivity = {
   id: 68021,
   title: 'Marketing Principal',
   description: 'up Optimization',
-  address: 'Franc',
-  date: dayjs('2023-09-17T17:01'),
-  maximum: 28409,
+  date: dayjs('2023-09-18T12:21'),
 };
 
 export const sampleWithPartialData: IActivity = {
-  id: 13370,
-  title: 'Future reciprocal platforms',
-  description: 'Clothing backing',
-  address: 'navigating Money',
-  date: dayjs('2023-09-18T03:33'),
-  maximum: 21902,
+  id: 69975,
+  title: 'Interactions',
+  description: 'programming',
+  date: dayjs('2023-09-17T19:34'),
 };
 
 export const sampleWithFullData: IActivity = {
-  id: 87964,
-  title: 'ability invoice',
-  description: 'Rustic Cloned copy',
-  address: 'Handcrafted algorithm',
-  date: dayjs('2023-09-17T22:18'),
-  maximum: 55531,
+  id: 26841,
+  title: 'content connect driver',
+  description: 'encompassing',
+  date: dayjs('2023-09-18T05:28'),
 };
 
 export const sampleWithNewData: NewActivity = {
-  title: 'Liberia Market Soft',
-  description: 'Rustic Senior',
-  address: 'Berkshire Point',
-  date: dayjs('2023-09-18T03:23'),
-  maximum: 98771,
+  title: 'Money Fields frictionless',
+  description: 'invoice bandwidth',
+  date: dayjs('2023-09-17T19:49'),
   id: null,
 };
 

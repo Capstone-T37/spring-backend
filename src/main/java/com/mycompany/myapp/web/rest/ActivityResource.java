@@ -21,7 +21,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -77,8 +76,6 @@ public class ActivityResource {
                 .date(activityDto.getDate())
                 .user(user.get())
                 .description(activityDto.getDescription())
-                .maximum(activityDto.getMaximum())
-                .address(activityDto.getAddress())
                 .build()
         );
 
@@ -159,14 +156,8 @@ public class ActivityResource {
                 if (activity.getDescription() != null) {
                     existingActivity.setDescription(activity.getDescription());
                 }
-                if (activity.getAddress() != null) {
-                    existingActivity.setAddress(activity.getAddress());
-                }
                 if (activity.getDate() != null) {
                     existingActivity.setDate(activity.getDate());
-                }
-                if (activity.getMaximum() != null) {
-                    existingActivity.setMaximum(activity.getMaximum());
                 }
 
                 return existingActivity;
@@ -186,7 +177,8 @@ public class ActivityResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of activities in body.
      */
     @GetMapping("/activities")
-    public ResponseEntity<List<GetActivityDto>> getAllActivities(@org.springdoc.api.annotations.ParameterObject Pageable pageable) {
+    public ResponseEntity<List<GetActivityDto>> getAllActivities(@org.springdoc.api.annotations.ParameterObject Pageable pageable)
+        throws Exception {
         log.debug("REST request to get a page of Activities");
         Optional<User> user = userService.getUserWithAuthorities();
         if (user.isEmpty()) {

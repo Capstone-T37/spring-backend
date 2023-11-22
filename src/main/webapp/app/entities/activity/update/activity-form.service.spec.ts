@@ -22,9 +22,7 @@ describe('Activity Form Service', () => {
             id: expect.any(Object),
             title: expect.any(Object),
             description: expect.any(Object),
-            address: expect.any(Object),
             date: expect.any(Object),
-            maximum: expect.any(Object),
             user: expect.any(Object),
           })
         );
@@ -38,9 +36,7 @@ describe('Activity Form Service', () => {
             id: expect.any(Object),
             title: expect.any(Object),
             description: expect.any(Object),
-            address: expect.any(Object),
             date: expect.any(Object),
-            maximum: expect.any(Object),
             user: expect.any(Object),
           })
         );

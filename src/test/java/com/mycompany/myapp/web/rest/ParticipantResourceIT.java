@@ -10,6 +10,7 @@ import com.mycompany.myapp.IntegrationTest;
 import com.mycompany.myapp.domain.Activity;
 import com.mycompany.myapp.domain.Participant;
 import com.mycompany.myapp.domain.User;
+import com.mycompany.myapp.dto.CreateParticipantDto;
 import com.mycompany.myapp.repository.ParticipantRepository;
 import java.util.ArrayList;
 import java.util.List;
@@ -123,7 +124,15 @@ class ParticipantResourceIT {
         int databaseSizeBeforeCreate = participantRepository.findAll().size();
         // Create the Participant
         restParticipantMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(participant)))
+            .perform(
+                post(ENTITY_API_URL)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        TestUtil.convertObjectToJsonBytes(
+                            CreateParticipantDto.builder().activityId(participant.getActivity().getId()).build()
+                        )
+                    )
+            )
             .andExpect(status().isCreated());
 
         // Validate the Participant in the database

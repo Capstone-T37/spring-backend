@@ -1,0 +1,38 @@
+<div class="d-flex justify-content-center">
+  <div class="col-8">
+    <div *ngIf="participant">
+      <h2 data-cy="participantDetailsHeading"><span jhiTranslate="meetupbackendApp.participant.detail.title">Participant</span></h2>
+
+      <hr />
+
+      <jhi-alert-error></jhi-alert-error>
+
+      <jhi-alert></jhi-alert>
+
+      <dl class="row-md jh-entity-details">
+        <dt><span jhiTranslate="global.field.id">ID</span></dt>
+        <dd>
+          <span>{{ participant.id }}</span>
+        </dd>
+        <dt><span jhiTranslate="meetupbackendApp.participant.user">User</span></dt>
+        <dd>
+          <span>{{ participant.user?.login }}</span>
+        </dd>
+        <dt><span jhiTranslate="meetupbackendApp.participant.activity">Activity</span></dt>
+        <dd>
+          <div *ngIf="participant.activity">
+            <a [routerLink]="['/activity', participant.activity.id, 'view']">{{ participant.activity.id }}</a>
+          </div>
+        </dd>
+      </dl>
+
+      <button type="submit" (click)="previousState()" class="btn btn-info" data-cy="entityDetailsBackButton">
+        <fa-icon icon="arrow-left"></fa-icon>&nbsp;<span jhiTranslate="entity.action.back">Back</span>
+      </button>
+
+      <button type="button" [routerLink]="['/participant', participant.id, 'edit']" class="btn btn-primary">
+        <fa-icon icon="pencil-alt"></fa-icon>&nbsp;<span jhiTranslate="entity.action.edit">Edit</span>
+      </button>
+    </div>
+  </div>
+</div>

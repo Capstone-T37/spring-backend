@@ -10,6 +10,7 @@
         "activity": "Activity",
         "meet": "Meet",
         "request": "Request",
+        "participant": "Participant",
         "jhipster-needle-menu-add-entry": "JHipster will add additional entities here (do not translate!)"
       },
       "account": {

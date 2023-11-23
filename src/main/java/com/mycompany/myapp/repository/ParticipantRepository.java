@@ -1,6 +1,8 @@
 package com.mycompany.myapp.repository;
 
+import com.mycompany.myapp.domain.Activity;
 import com.mycompany.myapp.domain.Participant;
+import com.mycompany.myapp.domain.User;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -28,6 +30,10 @@ public interface ParticipantRepository extends JpaRepository<Participant, Long> 
     default Page<Participant> findAllWithEagerRelationships(Pageable pageable) {
         return this.findAllWithToOneRelationships(pageable);
     }
+
+    Page<Participant> findByActivity(Pageable pageable, Activity activity);
+
+    Optional<Participant> findByActivityAndUser(Activity activity, User user);
 
     @Query(
         value = "select distinct participant from Participant participant left join fetch participant.user",

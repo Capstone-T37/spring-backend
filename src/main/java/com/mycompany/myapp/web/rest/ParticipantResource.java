@@ -1,7 +1,14 @@
 package com.mycompany.myapp.web.rest;
 
+import com.mycompany.myapp.domain.Activity;
 import com.mycompany.myapp.domain.Participant;
+import com.mycompany.myapp.domain.User;
+import com.mycompany.myapp.dto.CreateParticipantDto;
+import com.mycompany.myapp.dto.GetParticipantDto;
+import com.mycompany.myapp.repository.ActivityRepository;
 import com.mycompany.myapp.repository.ParticipantRepository;
+import com.mycompany.myapp.repository.UserRepository;
+import com.mycompany.myapp.service.UserService;
 import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -41,9 +48,20 @@ public class ParticipantResource {
     private String applicationName;
 
     private final ParticipantRepository participantRepository;
+    private final UserService userService;
+    private final ActivityRepository activityRepository;
+    private final UserRepository userRepository;
 
-    public ParticipantResource(ParticipantRepository participantRepository) {
+    public ParticipantResource(
+        ParticipantRepository participantRepository,
+        UserService userService,
+        ActivityRepository activityRepository,
+        UserRepository userRepository
+    ) {
         this.participantRepository = participantRepository;
+        this.userService = userService;
+        this.activityRepository = activityRepository;
+        this.userRepository = userRepository;
     }
 
     /**
@@ -54,16 +72,68 @@ public class ParticipantResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("/participants")
-    public ResponseEntity<Participant> createParticipant(@Valid @RequestBody Participant participant) throws URISyntaxException {
+    public ResponseEntity createParticipant(@Valid @RequestBody CreateParticipantDto participant) throws URISyntaxException {
         log.debug("REST request to save Participant : {}", participant);
-        if (participant.getId() != null) {
-            throw new BadRequestAlertException("A new participant cannot already have an ID", ENTITY_NAME, "idexists");
+        Optional<User> user = userService.getUserWithAuthorities();
+        if (user.isEmpty()) {
+            throw new IllegalCallerException("No user is logged in");
         }
-        Participant result = participantRepository.save(participant);
+        Optional<Activity> activity = activityRepository.findById(participant.getActivityId());
+        if (activity.isEmpty()) {
+            throw new BadRequestAlertException("Activity doesnt exist", "Activity", "id doesnt exist");
+        }
+        Optional<Participant> participant2 = participantRepository.findByActivityAndUser(activity.get(), user.get());
+
+        if (participant2.isPresent()) {
+            throw new BadRequestAlertException("User already a participant", ENTITY_NAME, "already exists");
+        }
+
+        if (activity.get().getUser().equals(user.get())) {
+            throw new BadRequestAlertException("User owns the activity", "", "");
+        }
+
+        Participant result = participantRepository.save(Participant.builder().activity(activity.get()).user(user.get()).build());
         return ResponseEntity
             .created(new URI("/api/participants/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
-            .body(result);
+            .build();
+    }
+
+    /**
+     * {@code GET  /participants/activity/:id} : get all the participants of activity.
+     *
+     * @param pageable the pagination information.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of participants in body.
+     */
+    @GetMapping("/participants/activity/{id}")
+    public ResponseEntity<List<GetParticipantDto>> getAllParticipantsOfActivity(
+        @PathVariable Long id,
+        @org.springdoc.api.annotations.ParameterObject Pageable pageable
+    ) {
+        log.debug("REST request to get a page of Participants for an activity");
+        Optional<User> user = userService.getUserWithAuthorities();
+        if (user.isEmpty()) {
+            throw new IllegalCallerException("No user is logged in");
+        }
+        Optional<Activity> activity = activityRepository.findById(id);
+        if (activity.isEmpty()) {
+            throw new BadRequestAlertException("Activity doesnt exist", "Activity", "id doesnt exist");
+        }
+        Page<GetParticipantDto> page;
+
+        page =
+            participantRepository
+                .findByActivity(pageable, activity.get())
+                .map(e -> {
+                    return GetParticipantDto
+                        .builder()
+                        .userName(userRepository.findById((e.getUser().getId())).get().getLogin())
+                        .id(e.getId())
+                        .build();
+                });
+
+        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
+        return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
 
     /**

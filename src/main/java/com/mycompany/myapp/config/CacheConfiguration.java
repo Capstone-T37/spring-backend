@@ -52,6 +52,8 @@ public class CacheConfiguration {
             createCache(cm, com.mycompany.myapp.domain.Meet.class.getName());
             createCache(cm, com.mycompany.myapp.domain.Request.class.getName());
             createCache(cm, com.mycompany.myapp.domain.Participant.class.getName());
+            createCache(cm, com.mycompany.myapp.domain.Tag.class.getName());
+            createCache(cm, com.mycompany.myapp.domain.ActivityTag.class.getName());
             // jhipster-needle-ehcache-add-entry
         };
     }

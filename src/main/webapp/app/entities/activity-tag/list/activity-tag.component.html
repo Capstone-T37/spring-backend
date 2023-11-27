@@ -1,0 +1,103 @@
+<div>
+  <h2 id="page-heading" data-cy="ActivityTagHeading">
+    <span jhiTranslate="meetupbackendApp.activityTag.home.title">Activity Tags</span>
+
+    <div class="d-flex justify-content-end">
+      <button class="btn btn-info me-2" (click)="load()" [disabled]="isLoading">
+        <fa-icon icon="sync" [spin]="isLoading"></fa-icon>
+        <span jhiTranslate="meetupbackendApp.activityTag.home.refreshListLabel">Refresh list</span>
+      </button>
+
+      <button
+        id="jh-create-entity"
+        data-cy="entityCreateButton"
+        class="btn btn-primary jh-create-entity create-activity-tag"
+        [routerLink]="['/activity-tag/new']"
+      >
+        <fa-icon icon="plus"></fa-icon>
+        <span jhiTranslate="meetupbackendApp.activityTag.home.createLabel"> Create a new Activity Tag </span>
+      </button>
+    </div>
+  </h2>
+
+  <jhi-alert-error></jhi-alert-error>
+
+  <jhi-alert></jhi-alert>
+
+  <div class="alert alert-warning" id="no-result" *ngIf="activityTags?.length === 0">
+    <span jhiTranslate="meetupbackendApp.activityTag.home.notFound">No Activity Tags found</span>
+  </div>
+
+  <div class="table-responsive table-entities" id="entities" *ngIf="activityTags && activityTags.length > 0">
+    <table class="table table-striped" aria-describedby="page-heading">
+      <thead>
+        <tr jhiSort [(predicate)]="predicate" [(ascending)]="ascending" (sortChange)="navigateToWithComponentValues()">
+          <th scope="col" jhiSortBy="id">
+            <div class="d-flex">
+              <span jhiTranslate="global.field.id">ID</span>
+              <fa-icon class="p-1" icon="sort"></fa-icon>
+            </div>
+          </th>
+          <th scope="col" jhiSortBy="tag.id">
+            <div class="d-flex">
+              <span jhiTranslate="meetupbackendApp.activityTag.tag">Tag</span>
+              <fa-icon class="p-1" icon="sort"></fa-icon>
+            </div>
+          </th>
+          <th scope="col" jhiSortBy="activity.id">
+            <div class="d-flex">
+              <span jhiTranslate="meetupbackendApp.activityTag.activity">Activity</span>
+              <fa-icon class="p-1" icon="sort"></fa-icon>
+            </div>
+          </th>
+          <th scope="col"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let activityTag of activityTags; trackBy: trackId" data-cy="entityTable">
+          <td>
+            <a [routerLink]="['/activity-tag', activityTag.id, 'view']">{{ activityTag.id }}</a>
+          </td>
+          <td>
+            <div *ngIf="activityTag.tag">
+              <a [routerLink]="['/tag', activityTag.tag.id, 'view']">{{ activityTag.tag.id }}</a>
+            </div>
+          </td>
+          <td>
+            <div *ngIf="activityTag.activity">
+              <a [routerLink]="['/activity', activityTag.activity.id, 'view']">{{ activityTag.activity.id }}</a>
+            </div>
+          </td>
+          <td class="text-end">
+            <div class="btn-group">
+              <button
+                type="submit"
+                [routerLink]="['/activity-tag', activityTag.id, 'view']"
+                class="btn btn-info btn-sm"
+                data-cy="entityDetailsButton"
+              >
+                <fa-icon icon="eye"></fa-icon>
+                <span class="d-none d-md-inline" jhiTranslate="entity.action.view">View</span>
+              </button>
+
+              <button
+                type="submit"
+                [routerLink]="['/activity-tag', activityTag.id, 'edit']"
+                class="btn btn-primary btn-sm"
+                data-cy="entityEditButton"
+              >
+                <fa-icon icon="pencil-alt"></fa-icon>
+                <span class="d-none d-md-inline" jhiTranslate="entity.action.edit">Edit</span>
+              </button>
+
+              <button type="submit" (click)="delete(activityTag)" class="btn btn-danger btn-sm" data-cy="entityDeleteButton">
+                <fa-icon icon="times"></fa-icon>
+                <span class="d-none d-md-inline" jhiTranslate="entity.action.delete">Delete</span>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

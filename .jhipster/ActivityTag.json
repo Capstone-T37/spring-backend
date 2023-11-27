@@ -1,0 +1,24 @@
+{
+  "changelogDate": "20231127000043",
+  "fields": [],
+  "name": "ActivityTag",
+  "pagination": "no",
+  "readOnly": false,
+  "relationships": [
+    {
+      "otherEntityField": "id",
+      "otherEntityName": "tag",
+      "relationshipName": "tag",
+      "relationshipType": "many-to-one",
+      "relationshipValidateRules": ["required"]
+    },
+    {
+      "otherEntityField": "id",
+      "otherEntityName": "activity",
+      "relationshipName": "activity",
+      "relationshipType": "many-to-one",
+      "relationshipValidateRules": ["required"]
+    }
+  ],
+  "service": "no"
+}

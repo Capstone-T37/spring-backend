@@ -33,6 +33,9 @@ public interface ParticipantRepository extends JpaRepository<Participant, Long> 
 
     Page<Participant> findByActivity(Pageable pageable, Activity activity);
 
+    @Query("select p.user from Participant p where p.activity.id = :activityId")
+    List<User> findAllUsersByActivityId(@Param("activityId") Long activityId);
+
     Optional<Participant> findByActivityAndUser(Activity activity, User user);
 
     @Query(

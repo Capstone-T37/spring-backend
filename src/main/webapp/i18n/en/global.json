@@ -11,6 +11,8 @@
         "meet": "Meet",
         "request": "Request",
         "participant": "Participant",
+        "tag": "Tag",
+        "activityTag": "Activity Tag",
         "jhipster-needle-menu-add-entry": "JHipster will add additional entities here (do not translate!)"
       },
       "account": {

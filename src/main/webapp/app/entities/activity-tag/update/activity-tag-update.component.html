@@ -1,0 +1,75 @@
+<div class="d-flex justify-content-center">
+  <div class="col-8">
+    <form name="editForm" role="form" novalidate (ngSubmit)="save()" [formGroup]="editForm">
+      <h2
+        id="jhi-activity-tag-heading"
+        data-cy="ActivityTagCreateUpdateHeading"
+        jhiTranslate="meetupbackendApp.activityTag.home.createOrEditLabel"
+      >
+        Create or edit a Activity Tag
+      </h2>
+
+      <div>
+        <jhi-alert-error></jhi-alert-error>
+
+        <div class="row mb-3" *ngIf="editForm.controls.id.value !== null">
+          <label class="form-label" jhiTranslate="global.field.id" for="field_id">ID</label>
+          <input type="number" class="form-control" name="id" id="field_id" data-cy="id" formControlName="id" [readonly]="true" />
+        </div>
+
+        <div class="row mb-3">
+          <label class="form-label" jhiTranslate="meetupbackendApp.activityTag.tag" for="field_tag">Tag</label>
+          <select class="form-control" id="field_tag" data-cy="tag" name="tag" formControlName="tag" [compareWith]="compareTag">
+            <option *ngIf="!editForm.get('tag')!.value" [ngValue]="null" selected></option>
+            <option [ngValue]="tagOption" *ngFor="let tagOption of tagsSharedCollection">{{ tagOption.id }}</option>
+          </select>
+        </div>
+        <div *ngIf="editForm.get(['tag'])!.invalid && (editForm.get(['tag'])!.dirty || editForm.get(['tag'])!.touched)">
+          <small class="form-text text-danger" *ngIf="editForm.get(['tag'])?.errors?.required" jhiTranslate="entity.validation.required">
+            This field is required.
+          </small>
+        </div>
+
+        <div class="row mb-3">
+          <label class="form-label" jhiTranslate="meetupbackendApp.activityTag.activity" for="field_activity">Activity</label>
+          <select
+            class="form-control"
+            id="field_activity"
+            data-cy="activity"
+            name="activity"
+            formControlName="activity"
+            [compareWith]="compareActivity"
+          >
+            <option *ngIf="!editForm.get('activity')!.value" [ngValue]="null" selected></option>
+            <option [ngValue]="activityOption" *ngFor="let activityOption of activitiesSharedCollection">{{ activityOption.id }}</option>
+          </select>
+        </div>
+        <div *ngIf="editForm.get(['activity'])!.invalid && (editForm.get(['activity'])!.dirty || editForm.get(['activity'])!.touched)">
+          <small
+            class="form-text text-danger"
+            *ngIf="editForm.get(['activity'])?.errors?.required"
+            jhiTranslate="entity.validation.required"
+          >
+            This field is required.
+          </small>
+        </div>
+      </div>
+
+      <div>
+        <button type="button" id="cancel-save" data-cy="entityCreateCancelButton" class="btn btn-secondary" (click)="previousState()">
+          <fa-icon icon="ban"></fa-icon>&nbsp;<span jhiTranslate="entity.action.cancel">Cancel</span>
+        </button>
+
+        <button
+          type="submit"
+          id="save-entity"
+          data-cy="entityCreateSaveButton"
+          [disabled]="editForm.invalid || isSaving"
+          class="btn btn-primary"
+        >
+          <fa-icon icon="save"></fa-icon>&nbsp;<span jhiTranslate="entity.action.save">Save</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

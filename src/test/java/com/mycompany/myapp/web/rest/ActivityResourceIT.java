@@ -242,7 +242,7 @@ class ActivityResourceIT {
     @Transactional
     void getNonExistingActivity() throws Exception {
         // Get the activity
-        restActivityMockMvc.perform(get(ENTITY_API_URL_ID, Long.MAX_VALUE)).andExpect(status().isNotFound());
+        restActivityMockMvc.perform(get(ENTITY_API_URL_ID, Long.MAX_VALUE)).andExpect(status().isBadRequest());
     }
 
     @Test

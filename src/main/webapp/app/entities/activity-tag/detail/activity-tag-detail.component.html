@@ -1,0 +1,40 @@
+<div class="d-flex justify-content-center">
+  <div class="col-8">
+    <div *ngIf="activityTag">
+      <h2 data-cy="activityTagDetailsHeading"><span jhiTranslate="meetupbackendApp.activityTag.detail.title">Activity Tag</span></h2>
+
+      <hr />
+
+      <jhi-alert-error></jhi-alert-error>
+
+      <jhi-alert></jhi-alert>
+
+      <dl class="row-md jh-entity-details">
+        <dt><span jhiTranslate="global.field.id">ID</span></dt>
+        <dd>
+          <span>{{ activityTag.id }}</span>
+        </dd>
+        <dt><span jhiTranslate="meetupbackendApp.activityTag.tag">Tag</span></dt>
+        <dd>
+          <div *ngIf="activityTag.tag">
+            <a [routerLink]="['/tag', activityTag.tag.id, 'view']">{{ activityTag.tag.id }}</a>
+          </div>
+        </dd>
+        <dt><span jhiTranslate="meetupbackendApp.activityTag.activity">Activity</span></dt>
+        <dd>
+          <div *ngIf="activityTag.activity">
+            <a [routerLink]="['/activity', activityTag.activity.id, 'view']">{{ activityTag.activity.id }}</a>
+          </div>
+        </dd>
+      </dl>
+
+      <button type="submit" (click)="previousState()" class="btn btn-info" data-cy="entityDetailsBackButton">
+        <fa-icon icon="arrow-left"></fa-icon>&nbsp;<span jhiTranslate="entity.action.back">Back</span>
+      </button>
+
+      <button type="button" [routerLink]="['/activity-tag', activityTag.id, 'edit']" class="btn btn-primary">
+        <fa-icon icon="pencil-alt"></fa-icon>&nbsp;<span jhiTranslate="entity.action.edit">Edit</span>
+      </button>
+    </div>
+  </div>
+</div>

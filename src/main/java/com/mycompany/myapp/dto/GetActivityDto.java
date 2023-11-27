@@ -5,8 +5,9 @@ import java.time.Instant;
 import javax.persistence.Column;
 import javax.validation.constraints.NotNull;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
-@Builder
+@SuperBuilder
 @Getter
 @Setter
 @NoArgsConstructor

@@ -1,10 +1,16 @@
 package com.mycompany.myapp.web.rest;
 
 import com.mycompany.myapp.domain.Activity;
+import com.mycompany.myapp.domain.Participant;
+import com.mycompany.myapp.domain.Tag;
 import com.mycompany.myapp.domain.User;
 import com.mycompany.myapp.dto.CreateActivityDto;
+import com.mycompany.myapp.dto.GetActivityDetailsDto;
 import com.mycompany.myapp.dto.GetActivityDto;
 import com.mycompany.myapp.repository.ActivityRepository;
+import com.mycompany.myapp.repository.ActivityTagRepository;
+import com.mycompany.myapp.repository.ParticipantRepository;
+import com.mycompany.myapp.repository.TagRepository;
 import com.mycompany.myapp.service.UserService;
 import com.mycompany.myapp.service.mapper.ActivityMapper;
 import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
@@ -13,6 +19,7 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import org.slf4j.Logger;
@@ -46,11 +53,22 @@ public class ActivityResource {
 
     private final ActivityRepository activityRepository;
 
+    private final ParticipantRepository participantRepository;
+
+    private final ActivityTagRepository activityTagRepository;
+
     private final UserService userService;
 
-    public ActivityResource(ActivityRepository activityRepository, UserService userService) {
+    public ActivityResource(
+        ActivityRepository activityRepository,
+        UserService userService,
+        ParticipantRepository participantRepository,
+        ActivityTagRepository activityTagRepository
+    ) {
         this.activityRepository = activityRepository;
         this.userService = userService;
+        this.participantRepository = participantRepository;
+        this.activityTagRepository = activityTagRepository;
     }
 
     /**
@@ -197,10 +215,35 @@ public class ActivityResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the activity, or with status {@code 404 (Not Found)}.
      */
     @GetMapping("/activities/{id}")
-    public ResponseEntity<Activity> getActivity(@PathVariable Long id) {
+    public ResponseEntity<GetActivityDetailsDto> getActivity(@PathVariable Long id) {
         log.debug("REST request to get Activity : {}", id);
+        Optional<User> user = userService.getUserWithAuthorities();
+        if (user.isEmpty()) {
+            throw new IllegalCallerException("No user is logged in");
+        }
         Optional<Activity> activity = activityRepository.findOneWithEagerRelationships(id);
-        return ResponseUtil.wrapOrNotFound(activity);
+        if (activity.isEmpty()) {
+            throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "id not found");
+        }
+        Activity acti = activity.get();
+        List<User> participants = participantRepository.findAllUsersByActivityId(acti.getId());
+        List<Tag> tags = activityTagRepository.findAllByActivity(acti);
+        Optional<Participant> isParticipant = participantRepository.findByActivityAndUser(acti, user.get());
+        return ResponseEntity
+            .ok()
+            .body(
+                GetActivityDetailsDto
+                    .builder()
+                    .id(acti.getId())
+                    .title(acti.getTitle())
+                    .date(acti.getDate())
+                    .isParticipating(isParticipant.isPresent())
+                    .description(acti.getDescription())
+                    .userName(acti.getUser().getLogin())
+                    .participants(participants.stream().map(User::getLogin).collect(Collectors.toList()))
+                    .tags(tags.stream().map(Tag::getTitle).collect(Collectors.toList()))
+                    .build()
+            );
     }
 
     /**

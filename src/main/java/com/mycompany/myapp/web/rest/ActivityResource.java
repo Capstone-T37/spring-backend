@@ -1,9 +1,6 @@
 package com.mycompany.myapp.web.rest;
 
-import com.mycompany.myapp.domain.Activity;
-import com.mycompany.myapp.domain.Participant;
-import com.mycompany.myapp.domain.Tag;
-import com.mycompany.myapp.domain.User;
+import com.mycompany.myapp.domain.*;
 import com.mycompany.myapp.dto.CreateActivityDto;
 import com.mycompany.myapp.dto.GetActivityDetailsDto;
 import com.mycompany.myapp.dto.GetActivityDto;
@@ -78,6 +75,7 @@ public class ActivityResource {
      * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new activity, or with status {@code 400 (Bad Request)} if the activity has already an ID.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
+    @Transactional
     @PostMapping("/activities")
     public ResponseEntity createActivity(@Valid @RequestBody CreateActivityDto activityDto) throws URISyntaxException {
         log.debug("REST request to save Activity : {}", activityDto);
@@ -86,7 +84,6 @@ public class ActivityResource {
         if (user.isEmpty()) {
             throw new IllegalCallerException("No user is logged in");
         }
-
         Activity result = activityRepository.save(
             Activity
                 .builder()
@@ -96,6 +93,16 @@ public class ActivityResource {
                 .description(activityDto.getDescription())
                 .build()
         );
+
+        activityDto
+            .getTags()
+            .forEach(tag -> {
+                log.debug("Processing tag: {}", tag);
+                activityTagRepository.save(
+                    ActivityTag.builder().activity(result).tag(Tag.builder().id(tag.getId()).title(tag.getTitle()).build()).build()
+                );
+                log.debug("Tag saved: {}", tag);
+            });
 
         return ResponseEntity
             .created(new URI("/api/activities/" + result.getId()))
@@ -227,7 +234,7 @@ public class ActivityResource {
         }
         Activity acti = activity.get();
         List<User> participants = participantRepository.findAllUsersByActivityId(acti.getId());
-        List<Tag> tags = activityTagRepository.findAllByActivity(acti);
+        List<Tag> tags = activityTagRepository.findAllByActivity(acti).stream().map(ActivityTag::getTag).collect(Collectors.toList());
         Optional<Participant> isParticipant = participantRepository.findByActivityAndUser(acti, user.get());
         return ResponseEntity
             .ok()

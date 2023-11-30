@@ -8,12 +8,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.mycompany.myapp.IntegrationTest;
 import com.mycompany.myapp.domain.Activity;
+import com.mycompany.myapp.domain.Tag;
 import com.mycompany.myapp.domain.User;
+import com.mycompany.myapp.dto.CreateActivityDto;
+import com.mycompany.myapp.dto.GetTagDto;
 import com.mycompany.myapp.repository.ActivityRepository;
+import com.mycompany.myapp.repository.TagRepository;
 import com.mycompany.myapp.web.rest.TestUtil;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
@@ -65,6 +70,9 @@ class ActivityResourceIT {
 
     @Autowired
     private ActivityRepository activityRepository;
+
+    @Autowired
+    private TagRepository tagRepository;
 
     @Mock
     private ActivityRepository activityRepositoryMock;
@@ -118,9 +126,24 @@ class ActivityResourceIT {
     @Transactional
     void createActivity() throws Exception {
         int databaseSizeBeforeCreate = activityRepository.findAll().size();
+        Tag tag = tagRepository.saveAndFlush(Tag.builder().title("test").build());
         // Create the Activity
         restActivityMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(activity)))
+            .perform(
+                post(ENTITY_API_URL)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        TestUtil.convertObjectToJsonBytes(
+                            CreateActivityDto
+                                .builder()
+                                .date(activity.getDate())
+                                .title(activity.getTitle())
+                                .description(activity.getDescription())
+                                .tags(List.of(GetTagDto.builder().id(tag.getId()).title(tag.getTitle()).build()))
+                                .build()
+                        )
+                    )
+            )
             .andExpect(status().isCreated());
 
         // Validate the Activity in the database
@@ -137,11 +160,26 @@ class ActivityResourceIT {
     void createActivityWithExistingId() throws Exception {
         // Create the Activity with an existing ID
         activity.setId(1L);
+        Tag tag = tagRepository.saveAndFlush(Tag.builder().title("test").build());
 
         int databaseSizeBeforeCreate = activityRepository.findAll().size();
 
         restActivityMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(activity)))
+            .perform(
+                post(ENTITY_API_URL)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        TestUtil.convertObjectToJsonBytes(
+                            CreateActivityDto
+                                .builder()
+                                .date(activity.getDate())
+                                .title(activity.getTitle())
+                                .description(activity.getDescription())
+                                .tags(List.of(GetTagDto.builder().id(tag.getId()).title(tag.getTitle()).build()))
+                                .build()
+                        )
+                    )
+            )
             .andExpect(status().isCreated());
 
         // Validate the Activity in the database

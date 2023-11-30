@@ -13,5 +13,5 @@ import org.springframework.stereotype.Repository;
 @SuppressWarnings("unused")
 @Repository
 public interface ActivityTagRepository extends JpaRepository<ActivityTag, Long> {
-    List<Tag> findAllByActivity(Activity activity);
+    List<ActivityTag> findAllByActivity(Activity activity);
 }

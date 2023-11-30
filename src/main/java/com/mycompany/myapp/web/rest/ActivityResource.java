@@ -98,7 +98,9 @@ public class ActivityResource {
             .getTags()
             .forEach(tag -> {
                 log.debug("Processing tag: {}", tag);
-                activityTagRepository.save(ActivityTag.builder().activity(result).tag(tag).build());
+                activityTagRepository.save(
+                    ActivityTag.builder().activity(result).tag(Tag.builder().id(tag.getId()).title(tag.getTitle()).build()).build()
+                );
                 log.debug("Tag saved: {}", tag);
             });
 

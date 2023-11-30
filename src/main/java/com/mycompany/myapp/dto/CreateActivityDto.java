@@ -1,16 +1,13 @@
 package com.mycompany.myapp.dto;
 
-import com.mycompany.myapp.domain.Tag;
 import java.time.Instant;
 import java.util.List;
 import javax.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateActivityDto {
@@ -25,5 +22,5 @@ public class CreateActivityDto {
     private Instant date;
 
     @NotNull
-    private List<Tag> tags;
+    private List<GetTagDto> tags;
 }

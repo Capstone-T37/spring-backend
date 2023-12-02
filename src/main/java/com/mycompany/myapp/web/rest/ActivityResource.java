@@ -215,6 +215,26 @@ public class ActivityResource {
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
 
+    @PostMapping("/activities/filter")
+    public ResponseEntity<List<GetActivityDto>> getAllActivitiesWithFilter(
+        @org.springdoc.api.annotations.ParameterObject Pageable pageable,
+        @RequestBody List<Tag> tags
+    ) throws Exception {
+        log.debug("REST request to get a page of Activities");
+        Optional<User> user = userService.getUserWithAuthorities();
+        if (user.isEmpty()) {
+            throw new IllegalCallerException("No user is logged in");
+        }
+        Page<GetActivityDto> page;
+        if (tags != null && !tags.isEmpty()) {
+            page = activityTagRepository.findByTagIn(pageable, tags).map(ActivityTag::getActivity).map(ActivityMapper::fromEntity);
+        } else {
+            page = activityRepository.findByUserNot(pageable, user.get()).map(ActivityMapper::fromEntity);
+        }
+        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
+        return ResponseEntity.ok().headers(headers).body(page.getContent());
+    }
+
     /**
      * {@code GET  /activities/:id} : get the "id" activity.
      *

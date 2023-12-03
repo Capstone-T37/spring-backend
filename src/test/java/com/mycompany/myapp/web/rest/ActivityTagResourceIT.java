@@ -2,6 +2,7 @@ package com.mycompany.myapp.web.rest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -9,15 +10,23 @@ import com.mycompany.myapp.IntegrationTest;
 import com.mycompany.myapp.domain.Activity;
 import com.mycompany.myapp.domain.ActivityTag;
 import com.mycompany.myapp.domain.Tag;
+import com.mycompany.myapp.domain.User;
 import com.mycompany.myapp.repository.ActivityTagRepository;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
@@ -27,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
  * Integration tests for the {@link ActivityTagResource} REST controller.
  */
 @IntegrationTest
+@ExtendWith(MockitoExtension.class)
 @AutoConfigureMockMvc
 @WithMockUser
 class ActivityTagResourceIT {
@@ -39,6 +49,9 @@ class ActivityTagResourceIT {
 
     @Autowired
     private ActivityTagRepository activityTagRepository;
+
+    @Mock
+    private ActivityTagRepository activityTagRepositoryMock;
 
     @Autowired
     private EntityManager em;
@@ -76,6 +89,11 @@ class ActivityTagResourceIT {
             activity = TestUtil.findAll(em, Activity.class).get(0);
         }
         activityTag.setActivity(activity);
+        // Add required entity
+        User user = UserResourceIT.createEntity(em);
+        em.persist(user);
+        em.flush();
+        activityTag.setUser(user);
         return activityTag;
     }
 
@@ -107,6 +125,11 @@ class ActivityTagResourceIT {
             activity = TestUtil.findAll(em, Activity.class).get(0);
         }
         activityTag.setActivity(activity);
+        // Add required entity
+        User user = UserResourceIT.createEntity(em);
+        em.persist(user);
+        em.flush();
+        activityTag.setUser(user);
         return activityTag;
     }
 
@@ -160,6 +183,23 @@ class ActivityTagResourceIT {
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(jsonPath("$.[*].id").value(hasItem(activityTag.getId().intValue())));
+    }
+
+    @SuppressWarnings({ "unchecked" })
+    void getAllActivityTagsWithEagerRelationshipsIsEnabled() throws Exception {
+        when(activityTagRepositoryMock.findAllWithEagerRelationships(any())).thenReturn(new PageImpl(new ArrayList<>()));
+
+        restActivityTagMockMvc.perform(get(ENTITY_API_URL + "?eagerload=true")).andExpect(status().isOk());
+
+        verify(activityTagRepositoryMock, times(1)).findAllWithEagerRelationships(any());
+    }
+
+    @SuppressWarnings({ "unchecked" })
+    void getAllActivityTagsWithEagerRelationshipsIsNotEnabled() throws Exception {
+        when(activityTagRepositoryMock.findAllWithEagerRelationships(any())).thenReturn(new PageImpl(new ArrayList<>()));
+
+        restActivityTagMockMvc.perform(get(ENTITY_API_URL + "?eagerload=false")).andExpect(status().isOk());
+        verify(activityTagRepositoryMock, times(1)).findAll(any(Pageable.class));
     }
 
     @Test

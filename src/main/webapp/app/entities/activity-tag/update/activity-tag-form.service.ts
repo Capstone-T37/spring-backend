@@ -20,6 +20,7 @@ type ActivityTagFormGroupContent = {
   id: FormControl<IActivityTag['id'] | NewActivityTag['id']>;
   tag: FormControl<IActivityTag['tag']>;
   activity: FormControl<IActivityTag['activity']>;
+  user: FormControl<IActivityTag['user']>;
 };
 
 export type ActivityTagFormGroup = FormGroup<ActivityTagFormGroupContent>;
@@ -43,6 +44,9 @@ export class ActivityTagFormService {
         validators: [Validators.required],
       }),
       activity: new FormControl(activityTagRawValue.activity, {
+        validators: [Validators.required],
+      }),
+      user: new FormControl(activityTagRawValue.user, {
         validators: [Validators.required],
       }),
     });

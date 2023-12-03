@@ -19,7 +19,8 @@
       },
       "id": "ID",
       "tag": "Tag",
-      "activity": "Activity"
+      "activity": "Activity",
+      "user": "User"
     }
   }
 }

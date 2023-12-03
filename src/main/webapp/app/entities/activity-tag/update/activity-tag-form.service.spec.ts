@@ -22,6 +22,7 @@ describe('ActivityTag Form Service', () => {
             id: expect.any(Object),
             tag: expect.any(Object),
             activity: expect.any(Object),
+            user: expect.any(Object),
           })
         );
       });
@@ -34,6 +35,7 @@ describe('ActivityTag Form Service', () => {
             id: expect.any(Object),
             tag: expect.any(Object),
             activity: expect.any(Object),
+            user: expect.any(Object),
           })
         );
       });

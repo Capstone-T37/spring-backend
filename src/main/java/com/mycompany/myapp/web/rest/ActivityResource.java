@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -99,7 +100,12 @@ public class ActivityResource {
             .forEach(tag -> {
                 log.debug("Processing tag: {}", tag);
                 activityTagRepository.save(
-                    ActivityTag.builder().activity(result).tag(Tag.builder().id(tag.getId()).title(tag.getTitle()).build()).build()
+                    ActivityTag
+                        .builder()
+                        .activity(result)
+                        .user(user.get())
+                        .tag(Tag.builder().id(tag.getId()).title(tag.getTitle()).build())
+                        .build()
                 );
                 log.debug("Tag saved: {}", tag);
             });
@@ -211,6 +217,35 @@ public class ActivityResource {
         }
         Page<GetActivityDto> page;
         page = activityRepository.findByUserNot(pageable, user.get()).map(ActivityMapper::fromEntity);
+        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
+        return ResponseEntity.ok().headers(headers).body(page.getContent());
+    }
+
+    @PostMapping("/activities/filter")
+    public ResponseEntity<List<GetActivityDto>> getAllActivitiesWithFilter(
+        @org.springdoc.api.annotations.ParameterObject Pageable pageable,
+        @RequestBody(required = false) List<Tag> tags
+    ) throws Exception {
+        log.debug("REST request to get a page of Activities");
+        Optional<User> user = userService.getUserWithAuthorities();
+        if (user.isEmpty()) {
+            throw new IllegalCallerException("No user is logged in");
+        }
+        Page<GetActivityDto> page;
+        if (tags != null && !tags.isEmpty()) {
+            page =
+                new PageImpl<>(
+                    activityTagRepository
+                        .findDistinctByTagInAndUserNot(pageable, tags, user.get())
+                        .map(ActivityTag::getActivity)
+                        .stream()
+                        .distinct()
+                        .map(ActivityMapper::fromEntity)
+                        .collect(Collectors.toList())
+                );
+        } else {
+            page = activityRepository.findByUserNot(pageable, user.get()).map(ActivityMapper::fromEntity);
+        }
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }

@@ -26,6 +26,10 @@
             <a [routerLink]="['/activity', activityTag.activity.id, 'view']">{{ activityTag.activity.id }}</a>
           </div>
         </dd>
+        <dt><span jhiTranslate="meetupbackendApp.activityTag.user">User</span></dt>
+        <dd>
+          <span>{{ activityTag.user?.login }}</span>
+        </dd>
       </dl>
 
       <button type="submit" (click)="previousState()" class="btn btn-info" data-cy="entityDetailsBackButton">

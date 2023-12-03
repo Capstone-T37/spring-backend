@@ -19,5 +19,11 @@
                                  constraintName="fk_activity_tag__activity_id"
                                  referencedColumnNames="id"
                                  referencedTableName="activity"/>
+
+        <addForeignKeyConstraint baseColumnNames="user_id"
+                                 baseTableName="activity_tag"
+                                 constraintName="fk_activity_tag__user_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="jhi_user"/>
     </changeSet>
 </databaseChangeLog>

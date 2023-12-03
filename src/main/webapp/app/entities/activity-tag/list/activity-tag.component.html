@@ -50,6 +50,12 @@
               <fa-icon class="p-1" icon="sort"></fa-icon>
             </div>
           </th>
+          <th scope="col" jhiSortBy="user.login">
+            <div class="d-flex">
+              <span jhiTranslate="meetupbackendApp.activityTag.user">User</span>
+              <fa-icon class="p-1" icon="sort"></fa-icon>
+            </div>
+          </th>
           <th scope="col"></th>
         </tr>
       </thead>
@@ -67,6 +73,9 @@
             <div *ngIf="activityTag.activity">
               <a [routerLink]="['/activity', activityTag.activity.id, 'view']">{{ activityTag.activity.id }}</a>
             </div>
+          </td>
+          <td>
+            {{ activityTag.user?.login }}
           </td>
           <td class="text-end">
             <div class="btn-group">

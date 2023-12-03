@@ -39,6 +39,10 @@ public class ActivityTag implements Serializable {
     @JsonIgnoreProperties(value = { "user" }, allowSetters = true)
     private Activity activity;
 
+    @ManyToOne(optional = false)
+    @NotNull
+    private User user;
+
     // jhipster-needle-entity-add-field - JHipster will add fields here
 
     public Long getId() {
@@ -77,6 +81,19 @@ public class ActivityTag implements Serializable {
 
     public ActivityTag activity(Activity activity) {
         this.setActivity(activity);
+        return this;
+    }
+
+    public User getUser() {
+        return this.user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public ActivityTag user(User user) {
+        this.setUser(user);
         return this;
     }
 

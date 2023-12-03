@@ -17,5 +17,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ActivityTagRepository extends JpaRepository<ActivityTag, Long> {
     List<ActivityTag> findAllByActivity(Activity activity);
-    Page<ActivityTag> findByTagIn(Pageable pageable, List<Tag> tags);
+    Page<ActivityTag> findDistinctByTagInAndUserNot(Pageable pageable, List<Tag> tags, User user);
 }

@@ -14,6 +14,9 @@ import { TagService } from 'app/entities/tag/service/tag.service';
 import { IActivity } from 'app/entities/activity/activity.model';
 import { ActivityService } from 'app/entities/activity/service/activity.service';
 
+import { IUser } from 'app/entities/user/user.model';
+import { UserService } from 'app/entities/user/user.service';
+
 import { ActivityTagUpdateComponent } from './activity-tag-update.component';
 
 describe('ActivityTag Management Update Component', () => {
@@ -24,6 +27,7 @@ describe('ActivityTag Management Update Component', () => {
   let activityTagService: ActivityTagService;
   let tagService: TagService;
   let activityService: ActivityService;
+  let userService: UserService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -48,6 +52,7 @@ describe('ActivityTag Management Update Component', () => {
     activityTagService = TestBed.inject(ActivityTagService);
     tagService = TestBed.inject(TagService);
     activityService = TestBed.inject(ActivityService);
+    userService = TestBed.inject(UserService);
 
     comp = fixture.componentInstance;
   });
@@ -94,18 +99,43 @@ describe('ActivityTag Management Update Component', () => {
       expect(comp.activitiesSharedCollection).toEqual(expectedCollection);
     });
 
+    it('Should call User query and add missing value', () => {
+      const activityTag: IActivityTag = { id: 456 };
+      const user: IUser = { id: 63043 };
+      activityTag.user = user;
+
+      const userCollection: IUser[] = [{ id: 70519 }];
+      jest.spyOn(userService, 'query').mockReturnValue(of(new HttpResponse({ body: userCollection })));
+      const additionalUsers = [user];
+      const expectedCollection: IUser[] = [...additionalUsers, ...userCollection];
+      jest.spyOn(userService, 'addUserToCollectionIfMissing').mockReturnValue(expectedCollection);
+
+      activatedRoute.data = of({ activityTag });
+      comp.ngOnInit();
+
+      expect(userService.query).toHaveBeenCalled();
+      expect(userService.addUserToCollectionIfMissing).toHaveBeenCalledWith(
+        userCollection,
+        ...additionalUsers.map(expect.objectContaining)
+      );
+      expect(comp.usersSharedCollection).toEqual(expectedCollection);
+    });
+
     it('Should update editForm', () => {
       const activityTag: IActivityTag = { id: 456 };
       const tag: ITag = { id: 84411 };
       activityTag.tag = tag;
       const activity: IActivity = { id: 43201 };
       activityTag.activity = activity;
+      const user: IUser = { id: 52995 };
+      activityTag.user = user;
 
       activatedRoute.data = of({ activityTag });
       comp.ngOnInit();
 
       expect(comp.tagsSharedCollection).toContain(tag);
       expect(comp.activitiesSharedCollection).toContain(activity);
+      expect(comp.usersSharedCollection).toContain(user);
       expect(comp.activityTag).toEqual(activityTag);
     });
   });
@@ -196,6 +226,16 @@ describe('ActivityTag Management Update Component', () => {
         jest.spyOn(activityService, 'compareActivity');
         comp.compareActivity(entity, entity2);
         expect(activityService.compareActivity).toHaveBeenCalledWith(entity, entity2);
+      });
+    });
+
+    describe('compareUser', () => {
+      it('Should forward to userService', () => {
+        const entity = { id: 123 };
+        const entity2 = { id: 456 };
+        jest.spyOn(userService, 'compareUser');
+        comp.compareUser(entity, entity2);
+        expect(userService.compareUser).toHaveBeenCalledWith(entity, entity2);
       });
     });
   });

@@ -11,6 +11,8 @@ import { ITag } from 'app/entities/tag/tag.model';
 import { TagService } from 'app/entities/tag/service/tag.service';
 import { IActivity } from 'app/entities/activity/activity.model';
 import { ActivityService } from 'app/entities/activity/service/activity.service';
+import { IUser } from 'app/entities/user/user.model';
+import { UserService } from 'app/entities/user/user.service';
 
 @Component({
   selector: 'jhi-activity-tag-update',
@@ -22,6 +24,7 @@ export class ActivityTagUpdateComponent implements OnInit {
 
   tagsSharedCollection: ITag[] = [];
   activitiesSharedCollection: IActivity[] = [];
+  usersSharedCollection: IUser[] = [];
 
   editForm: ActivityTagFormGroup = this.activityTagFormService.createActivityTagFormGroup();
 
@@ -30,12 +33,15 @@ export class ActivityTagUpdateComponent implements OnInit {
     protected activityTagFormService: ActivityTagFormService,
     protected tagService: TagService,
     protected activityService: ActivityService,
+    protected userService: UserService,
     protected activatedRoute: ActivatedRoute
   ) {}
 
   compareTag = (o1: ITag | null, o2: ITag | null): boolean => this.tagService.compareTag(o1, o2);
 
   compareActivity = (o1: IActivity | null, o2: IActivity | null): boolean => this.activityService.compareActivity(o1, o2);
+
+  compareUser = (o1: IUser | null, o2: IUser | null): boolean => this.userService.compareUser(o1, o2);
 
   ngOnInit(): void {
     this.activatedRoute.data.subscribe(({ activityTag }) => {
@@ -90,6 +96,7 @@ export class ActivityTagUpdateComponent implements OnInit {
       this.activitiesSharedCollection,
       activityTag.activity
     );
+    this.usersSharedCollection = this.userService.addUserToCollectionIfMissing<IUser>(this.usersSharedCollection, activityTag.user);
   }
 
   protected loadRelationshipsOptions(): void {
@@ -108,5 +115,11 @@ export class ActivityTagUpdateComponent implements OnInit {
         )
       )
       .subscribe((activities: IActivity[]) => (this.activitiesSharedCollection = activities));
+
+    this.userService
+      .query()
+      .pipe(map((res: HttpResponse<IUser[]>) => res.body ?? []))
+      .pipe(map((users: IUser[]) => this.userService.addUserToCollectionIfMissing<IUser>(users, this.activityTag?.user)))
+      .subscribe((users: IUser[]) => (this.usersSharedCollection = users));
   }
 }

@@ -1,9 +1,12 @@
 package com.mycompany.myapp.web.rest;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthException;
 import com.mycompany.myapp.domain.User;
 import com.mycompany.myapp.dto.GetProfileInfoDto;
 import com.mycompany.myapp.repository.UserRepository;
 import com.mycompany.myapp.security.SecurityUtils;
+import com.mycompany.myapp.security.jwt.JWTFilter;
 import com.mycompany.myapp.service.MailService;
 import com.mycompany.myapp.service.UserService;
 import com.mycompany.myapp.service.dto.AdminUserDTO;
@@ -17,7 +20,9 @@ import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -58,12 +63,15 @@ public class AccountResource {
      */
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public void registerAccount(@Valid @RequestBody ManagedUserVM managedUserVM) {
+    public ResponseEntity registerAccount(@Valid @RequestBody ManagedUserVM managedUserVM) throws FirebaseAuthException {
         if (isPasswordLengthInvalid(managedUserVM.getPassword())) {
             throw new InvalidPasswordException();
         }
         User user = userService.registerUser(managedUserVM, managedUserVM.getPassword());
-        //mailService.sendActivationEmail(user);
+        HttpHeaders httpHeaders = new HttpHeaders();
+        String firebaseToken = FirebaseAuth.getInstance().createCustomToken(managedUserVM.getLogin());
+        httpHeaders.add("FirebaseToken", firebaseToken);
+        return new ResponseEntity<>(httpHeaders, HttpStatus.CREATED);
     }
 
     /**

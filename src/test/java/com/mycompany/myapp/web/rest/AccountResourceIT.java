@@ -2,9 +2,13 @@ package com.mycompany.myapp.web.rest;
 
 import static com.mycompany.myapp.web.rest.AccountResourceIT.TEST_USER_LOGIN;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.mycompany.myapp.IntegrationTest;
 import com.mycompany.myapp.config.Constants;
 import com.mycompany.myapp.domain.User;
@@ -21,6 +25,8 @@ import java.time.Instant;
 import java.util.*;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
@@ -116,22 +122,33 @@ class AccountResourceIT {
     @Test
     @Transactional
     void testRegisterValid() throws Exception {
-        ManagedUserVM validUser = new ManagedUserVM();
-        validUser.setLogin("test-register-valid");
-        validUser.setPassword("password");
-        validUser.setFirstName("Alice");
-        validUser.setLastName("Test");
-        validUser.setEmail("test-register-valid@example.com");
-        validUser.setImageUrl("http://placehold.it/50x50");
-        validUser.setLangKey(Constants.DEFAULT_LANGUAGE);
-        validUser.setAuthorities(Collections.singleton(AuthoritiesConstants.USER));
-        assertThat(userRepository.findOneByLogin("test-register-valid")).isEmpty();
+        try (MockedStatic<FirebaseAuth> mockedFirebaseAuth = Mockito.mockStatic(FirebaseAuth.class)) {
+            FirebaseAuth mockFirebaseAuthInstance = mock(FirebaseAuth.class);
 
-        restAccountMockMvc
-            .perform(post("/api/register").contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(validUser)))
-            .andExpect(status().isCreated());
+            // Mock the static method call
+            mockedFirebaseAuth.when(FirebaseAuth::getInstance).thenReturn(mockFirebaseAuthInstance);
 
-        assertThat(userRepository.findOneByLogin("test-register-valid")).isPresent();
+            // Mock the instance method call
+            when(mockFirebaseAuthInstance.createCustomToken(anyString())).thenReturn("MockedFirebaseToken");
+            ManagedUserVM validUser = new ManagedUserVM();
+            validUser.setLogin("test-register-valid");
+            validUser.setPassword("password");
+            validUser.setFirstName("Alice");
+            validUser.setLastName("Test");
+            validUser.setEmail("test-register-valid@example.com");
+            validUser.setImageUrl("http://placehold.it/50x50");
+            validUser.setLangKey(Constants.DEFAULT_LANGUAGE);
+            validUser.setAuthorities(Collections.singleton(AuthoritiesConstants.USER));
+            assertThat(userRepository.findOneByLogin("test-register-valid")).isEmpty();
+
+            restAccountMockMvc
+                .perform(
+                    post("/api/register").contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(validUser))
+                )
+                .andExpect(status().isCreated());
+
+            assertThat(userRepository.findOneByLogin("test-register-valid")).isPresent();
+        }
     }
 
     @Test
@@ -225,144 +242,185 @@ class AccountResourceIT {
     @Test
     @Transactional
     void testRegisterDuplicateLogin() throws Exception {
-        // First registration
-        ManagedUserVM firstUser = new ManagedUserVM();
-        firstUser.setLogin("alice");
-        firstUser.setPassword("password");
-        firstUser.setFirstName("Alice");
-        firstUser.setLastName("Something");
-        firstUser.setEmail("alice@example.com");
-        firstUser.setImageUrl("http://placehold.it/50x50");
-        firstUser.setLangKey(Constants.DEFAULT_LANGUAGE);
-        firstUser.setAuthorities(Collections.singleton(AuthoritiesConstants.USER));
+        try (MockedStatic<FirebaseAuth> mockedFirebaseAuth = Mockito.mockStatic(FirebaseAuth.class)) {
+            FirebaseAuth mockFirebaseAuthInstance = mock(FirebaseAuth.class);
 
-        // Duplicate login, different email
-        ManagedUserVM secondUser = new ManagedUserVM();
-        secondUser.setLogin(firstUser.getLogin());
-        secondUser.setPassword(firstUser.getPassword());
-        secondUser.setFirstName(firstUser.getFirstName());
-        secondUser.setLastName(firstUser.getLastName());
-        secondUser.setEmail("alice2@example.com");
-        secondUser.setImageUrl(firstUser.getImageUrl());
-        secondUser.setLangKey(firstUser.getLangKey());
-        secondUser.setCreatedBy(firstUser.getCreatedBy());
-        secondUser.setCreatedDate(firstUser.getCreatedDate());
-        secondUser.setLastModifiedBy(firstUser.getLastModifiedBy());
-        secondUser.setLastModifiedDate(firstUser.getLastModifiedDate());
-        secondUser.setAuthorities(new HashSet<>(firstUser.getAuthorities()));
+            // Mock the static method call
+            mockedFirebaseAuth.when(FirebaseAuth::getInstance).thenReturn(mockFirebaseAuthInstance);
 
-        // First user
-        restAccountMockMvc
-            .perform(post("/api/register").contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(firstUser)))
-            .andExpect(status().isCreated());
+            // Mock the instance method call
+            when(mockFirebaseAuthInstance.createCustomToken(anyString())).thenReturn("MockedFirebaseToken");
+            // First registration
+            ManagedUserVM firstUser = new ManagedUserVM();
+            firstUser.setLogin("alice");
+            firstUser.setPassword("password");
+            firstUser.setFirstName("Alice");
+            firstUser.setLastName("Something");
+            firstUser.setEmail("alice@example.com");
+            firstUser.setImageUrl("http://placehold.it/50x50");
+            firstUser.setLangKey(Constants.DEFAULT_LANGUAGE);
+            firstUser.setAuthorities(Collections.singleton(AuthoritiesConstants.USER));
 
-        // Second (non activated) user
-        restAccountMockMvc
-            .perform(post("/api/register").contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(secondUser)))
-            .andExpect(status().isBadRequest());
+            // Duplicate login, different email
+            ManagedUserVM secondUser = new ManagedUserVM();
+            secondUser.setLogin(firstUser.getLogin());
+            secondUser.setPassword(firstUser.getPassword());
+            secondUser.setFirstName(firstUser.getFirstName());
+            secondUser.setLastName(firstUser.getLastName());
+            secondUser.setEmail("alice2@example.com");
+            secondUser.setImageUrl(firstUser.getImageUrl());
+            secondUser.setLangKey(firstUser.getLangKey());
+            secondUser.setCreatedBy(firstUser.getCreatedBy());
+            secondUser.setCreatedDate(firstUser.getCreatedDate());
+            secondUser.setLastModifiedBy(firstUser.getLastModifiedBy());
+            secondUser.setLastModifiedDate(firstUser.getLastModifiedDate());
+            secondUser.setAuthorities(new HashSet<>(firstUser.getAuthorities()));
 
-        Optional<User> testUser = userRepository.findOneByEmailIgnoreCase("alice2@example.com");
-        assertThat(testUser).isEmpty();
-        // Second (already activated) user
-        restAccountMockMvc
-            .perform(post("/api/register").contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(secondUser)))
-            .andExpect(status().is4xxClientError());
+            // First user
+            restAccountMockMvc
+                .perform(
+                    post("/api/register").contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(firstUser))
+                )
+                .andExpect(status().isCreated());
+
+            // Second (non activated) user
+            restAccountMockMvc
+                .perform(
+                    post("/api/register").contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(secondUser))
+                )
+                .andExpect(status().isBadRequest());
+
+            Optional<User> testUser = userRepository.findOneByEmailIgnoreCase("alice2@example.com");
+            assertThat(testUser).isEmpty();
+            // Second (already activated) user
+            restAccountMockMvc
+                .perform(
+                    post("/api/register").contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(secondUser))
+                )
+                .andExpect(status().is4xxClientError());
+        }
     }
 
     @Test
     @Transactional
     void testRegisterDuplicateEmail() throws Exception {
-        // First user
-        ManagedUserVM firstUser = new ManagedUserVM();
-        firstUser.setLogin("test-register-duplicate-email");
-        firstUser.setPassword("password");
-        firstUser.setFirstName("Alice");
-        firstUser.setLastName("Test");
-        firstUser.setEmail("test-register-duplicate-email@example.com");
-        firstUser.setImageUrl("http://placehold.it/50x50");
-        firstUser.setLangKey(Constants.DEFAULT_LANGUAGE);
-        firstUser.setAuthorities(Collections.singleton(AuthoritiesConstants.USER));
+        try (MockedStatic<FirebaseAuth> mockedFirebaseAuth = Mockito.mockStatic(FirebaseAuth.class)) {
+            FirebaseAuth mockFirebaseAuthInstance = mock(FirebaseAuth.class);
 
-        // Register first user
-        restAccountMockMvc
-            .perform(post("/api/register").contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(firstUser)))
-            .andExpect(status().isCreated());
+            // Mock the static method call
+            mockedFirebaseAuth.when(FirebaseAuth::getInstance).thenReturn(mockFirebaseAuthInstance);
 
-        Optional<User> testUser1 = userRepository.findOneByLogin("test-register-duplicate-email");
-        assertThat(testUser1).isPresent();
+            // Mock the instance method call
+            when(mockFirebaseAuthInstance.createCustomToken(anyString())).thenReturn("MockedFirebaseToken");
+            // First user
+            ManagedUserVM firstUser = new ManagedUserVM();
+            firstUser.setLogin("test-register-duplicate-email");
+            firstUser.setPassword("password");
+            firstUser.setFirstName("Alice");
+            firstUser.setLastName("Test");
+            firstUser.setEmail("test-register-duplicate-email@example.com");
+            firstUser.setImageUrl("http://placehold.it/50x50");
+            firstUser.setLangKey(Constants.DEFAULT_LANGUAGE);
+            firstUser.setAuthorities(Collections.singleton(AuthoritiesConstants.USER));
 
-        // Duplicate email, different login
-        ManagedUserVM secondUser = new ManagedUserVM();
-        secondUser.setLogin("test-register-duplicate-email-2");
-        secondUser.setPassword(firstUser.getPassword());
-        secondUser.setFirstName(firstUser.getFirstName());
-        secondUser.setLastName(firstUser.getLastName());
-        secondUser.setEmail(firstUser.getEmail());
-        secondUser.setImageUrl(firstUser.getImageUrl());
-        secondUser.setLangKey(firstUser.getLangKey());
-        secondUser.setAuthorities(new HashSet<>(firstUser.getAuthorities()));
+            // Register first user
+            restAccountMockMvc
+                .perform(
+                    post("/api/register").contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(firstUser))
+                )
+                .andExpect(status().isCreated());
 
-        // Register second (non activated) user
-        restAccountMockMvc
-            .perform(post("/api/register").contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(secondUser)))
-            .andExpect(status().isBadRequest());
+            Optional<User> testUser1 = userRepository.findOneByLogin("test-register-duplicate-email");
+            assertThat(testUser1).isPresent();
 
-        Optional<User> testUser2 = userRepository.findOneByLogin("test-register-duplicate-email-2");
-        assertThat(testUser2).isEmpty();
+            // Duplicate email, different login
+            ManagedUserVM secondUser = new ManagedUserVM();
+            secondUser.setLogin("test-register-duplicate-email-2");
+            secondUser.setPassword(firstUser.getPassword());
+            secondUser.setFirstName(firstUser.getFirstName());
+            secondUser.setLastName(firstUser.getLastName());
+            secondUser.setEmail(firstUser.getEmail());
+            secondUser.setImageUrl(firstUser.getImageUrl());
+            secondUser.setLangKey(firstUser.getLangKey());
+            secondUser.setAuthorities(new HashSet<>(firstUser.getAuthorities()));
 
-        // Duplicate email - with uppercase email address
-        ManagedUserVM userWithUpperCaseEmail = new ManagedUserVM();
-        userWithUpperCaseEmail.setId(firstUser.getId());
-        userWithUpperCaseEmail.setLogin("test-register-duplicate-email-3");
-        userWithUpperCaseEmail.setPassword(firstUser.getPassword());
-        userWithUpperCaseEmail.setFirstName(firstUser.getFirstName());
-        userWithUpperCaseEmail.setLastName(firstUser.getLastName());
-        userWithUpperCaseEmail.setEmail("TEST-register-duplicate-email@example.com");
-        userWithUpperCaseEmail.setImageUrl(firstUser.getImageUrl());
-        userWithUpperCaseEmail.setLangKey(firstUser.getLangKey());
-        userWithUpperCaseEmail.setAuthorities(new HashSet<>(firstUser.getAuthorities()));
+            // Register second (non activated) user
+            restAccountMockMvc
+                .perform(
+                    post("/api/register").contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(secondUser))
+                )
+                .andExpect(status().isBadRequest());
 
-        // Register third (not activated) user
-        restAccountMockMvc
-            .perform(
-                post("/api/register")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(userWithUpperCaseEmail))
-            )
-            .andExpect(status().isBadRequest());
+            Optional<User> testUser2 = userRepository.findOneByLogin("test-register-duplicate-email-2");
+            assertThat(testUser2).isEmpty();
 
-        Optional<User> testUser4 = userRepository.findOneByLogin("test-register-duplicate-email-3");
-        assertThat(testUser4).isEmpty();
+            // Duplicate email - with uppercase email address
+            ManagedUserVM userWithUpperCaseEmail = new ManagedUserVM();
+            userWithUpperCaseEmail.setId(firstUser.getId());
+            userWithUpperCaseEmail.setLogin("test-register-duplicate-email-3");
+            userWithUpperCaseEmail.setPassword(firstUser.getPassword());
+            userWithUpperCaseEmail.setFirstName(firstUser.getFirstName());
+            userWithUpperCaseEmail.setLastName(firstUser.getLastName());
+            userWithUpperCaseEmail.setEmail("TEST-register-duplicate-email@example.com");
+            userWithUpperCaseEmail.setImageUrl(firstUser.getImageUrl());
+            userWithUpperCaseEmail.setLangKey(firstUser.getLangKey());
+            userWithUpperCaseEmail.setAuthorities(new HashSet<>(firstUser.getAuthorities()));
 
-        // Register 4th (already activated) user
-        restAccountMockMvc
-            .perform(post("/api/register").contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(secondUser)))
-            .andExpect(status().is4xxClientError());
+            // Register third (not activated) user
+            restAccountMockMvc
+                .perform(
+                    post("/api/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(TestUtil.convertObjectToJsonBytes(userWithUpperCaseEmail))
+                )
+                .andExpect(status().isBadRequest());
+
+            Optional<User> testUser4 = userRepository.findOneByLogin("test-register-duplicate-email-3");
+            assertThat(testUser4).isEmpty();
+
+            // Register 4th (already activated) user
+            restAccountMockMvc
+                .perform(
+                    post("/api/register").contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(secondUser))
+                )
+                .andExpect(status().is4xxClientError());
+        }
     }
 
     @Test
     @Transactional
     void testRegisterAdminIsIgnored() throws Exception {
-        ManagedUserVM validUser = new ManagedUserVM();
-        validUser.setLogin("badguy");
-        validUser.setPassword("password");
-        validUser.setFirstName("Bad");
-        validUser.setLastName("Guy");
-        validUser.setEmail("badguy@example.com");
-        validUser.setActivated(true);
-        validUser.setImageUrl("http://placehold.it/50x50");
-        validUser.setLangKey(Constants.DEFAULT_LANGUAGE);
-        validUser.setAuthorities(Collections.singleton(AuthoritiesConstants.ADMIN));
+        try (MockedStatic<FirebaseAuth> mockedFirebaseAuth = Mockito.mockStatic(FirebaseAuth.class)) {
+            FirebaseAuth mockFirebaseAuthInstance = mock(FirebaseAuth.class);
 
-        restAccountMockMvc
-            .perform(post("/api/register").contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(validUser)))
-            .andExpect(status().isCreated());
+            // Mock the static method call
+            mockedFirebaseAuth.when(FirebaseAuth::getInstance).thenReturn(mockFirebaseAuthInstance);
 
-        Optional<User> userDup = userRepository.findOneWithAuthoritiesByLogin("badguy");
-        assertThat(userDup).isPresent();
-        assertThat(userDup.get().getAuthorities())
-            .hasSize(1)
-            .containsExactly(authorityRepository.findById(AuthoritiesConstants.USER).get());
+            // Mock the instance method call
+            when(mockFirebaseAuthInstance.createCustomToken(anyString())).thenReturn("MockedFirebaseToken");
+            ManagedUserVM validUser = new ManagedUserVM();
+            validUser.setLogin("badguy");
+            validUser.setPassword("password");
+            validUser.setFirstName("Bad");
+            validUser.setLastName("Guy");
+            validUser.setEmail("badguy@example.com");
+            validUser.setActivated(true);
+            validUser.setImageUrl("http://placehold.it/50x50");
+            validUser.setLangKey(Constants.DEFAULT_LANGUAGE);
+            validUser.setAuthorities(Collections.singleton(AuthoritiesConstants.ADMIN));
+
+            restAccountMockMvc
+                .perform(
+                    post("/api/register").contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(validUser))
+                )
+                .andExpect(status().isCreated());
+
+            Optional<User> userDup = userRepository.findOneWithAuthoritiesByLogin("badguy");
+            assertThat(userDup).isPresent();
+            assertThat(userDup.get().getAuthorities())
+                .hasSize(1)
+                .containsExactly(authorityRepository.findById(AuthoritiesConstants.USER).get());
+        }
     }
 
     @Test

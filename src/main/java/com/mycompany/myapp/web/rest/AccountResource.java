@@ -121,6 +121,27 @@ public class AccountResource {
             .orElseThrow(() -> new AccountResourceException("User could not be found"));
     }
 
+    @PostMapping("/account/profile")
+    public void updateProfile(@Valid @RequestBody GetProfileInfoDto userDTO) {
+        String userLogin = SecurityUtils
+            .getCurrentUserLogin()
+            .orElseThrow(() -> new AccountResourceException("Current user login not found"));
+        Optional<User> user = userRepository.findOneByLogin(userLogin);
+        if (!user.isPresent()) {
+            throw new AccountResourceException("User could not be found");
+        }
+        if (userDTO.getImageUrl() == null) {
+            throw new BadRequestAlertException("imageUrl cant be null", "User", "imageUrlNull");
+        }
+        userService.updateUser(
+            user.get().getFirstName(),
+            user.get().getLastName(),
+            user.get().getEmail(),
+            user.get().getLangKey(),
+            userDTO.getImageUrl()
+        );
+    }
+
     /**
      * {@code POST  /account} : update the current user information.
      *

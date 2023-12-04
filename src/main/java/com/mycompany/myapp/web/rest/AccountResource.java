@@ -71,7 +71,7 @@ public class AccountResource {
         HttpHeaders httpHeaders = new HttpHeaders();
         String firebaseToken = FirebaseAuth.getInstance().createCustomToken(managedUserVM.getLogin());
         httpHeaders.add("FirebaseToken", firebaseToken);
-        return new ResponseEntity<>(httpHeaders, HttpStatus.OK);
+        return new ResponseEntity<>(httpHeaders, HttpStatus.CREATED);
     }
 
     /**

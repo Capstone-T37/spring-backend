@@ -1,6 +1,7 @@
 package com.mycompany.myapp.web.rest;
 
 import com.mycompany.myapp.domain.User;
+import com.mycompany.myapp.dto.GetProfileInfoDto;
 import com.mycompany.myapp.repository.UserRepository;
 import com.mycompany.myapp.security.SecurityUtils;
 import com.mycompany.myapp.service.MailService;
@@ -103,6 +104,42 @@ public class AccountResource {
             .getUserWithAuthorities()
             .map(AdminUserDTO::new)
             .orElseThrow(() -> new AccountResourceException("User could not be found"));
+    }
+
+    @GetMapping("/account/profile")
+    public GetProfileInfoDto getProfile() {
+        return userService
+            .getUserWithAuthorities()
+            .map(e ->
+                GetProfileInfoDto
+                    .builder()
+                    .imageUrl(e.getImageUrl())
+                    .fullName(e.getFirstName() + " " + e.getLastName())
+                    .userName(e.getLogin())
+                    .build()
+            )
+            .orElseThrow(() -> new AccountResourceException("User could not be found"));
+    }
+
+    @PostMapping("/account/profile")
+    public void updateProfile(@Valid @RequestBody GetProfileInfoDto userDTO) {
+        String userLogin = SecurityUtils
+            .getCurrentUserLogin()
+            .orElseThrow(() -> new AccountResourceException("Current user login not found"));
+        Optional<User> user = userRepository.findOneByLogin(userLogin);
+        if (!user.isPresent()) {
+            throw new AccountResourceException("User could not be found");
+        }
+        if (userDTO.getImageUrl() == null) {
+            throw new BadRequestAlertException("imageUrl cant be null", "User", "imageUrlNull");
+        }
+        userService.updateUser(
+            user.get().getFirstName(),
+            user.get().getLastName(),
+            user.get().getEmail(),
+            user.get().getLangKey(),
+            userDTO.getImageUrl()
+        );
     }
 
     /**

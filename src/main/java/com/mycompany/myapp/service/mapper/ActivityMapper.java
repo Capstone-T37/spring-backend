@@ -15,6 +15,7 @@ public class ActivityMapper {
             .title(activity.getTitle())
             .description(activity.getDescription())
             .date(activity.getDate())
+            .imageUrl(activity.getUser().getImageUrl())
             .build();
     }
 }

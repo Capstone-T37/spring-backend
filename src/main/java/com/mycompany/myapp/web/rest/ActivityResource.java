@@ -284,6 +284,7 @@ public class ActivityResource {
                     .userName(acti.getUser().getLogin())
                     .participants(participants.stream().map(User::getLogin).collect(Collectors.toList()))
                     .tags(tags.stream().map(Tag::getTitle).collect(Collectors.toList()))
+                    .imageUrl(acti.getUser().getImageUrl())
                     .build()
             );
     }

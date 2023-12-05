@@ -28,4 +28,6 @@ public class GetActivityDto {
 
     @NotNull
     private Instant date;
+
+    private String imageUrl;
 }

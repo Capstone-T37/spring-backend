@@ -12,6 +12,7 @@ public class MeetMapper {
             .userName(meet.getUser().getLogin())
             .description(meet.getDescription())
             .isEnabled(meet.getIsEnabled())
+            .imageUrl(meet.getUser().getImageUrl())
             .build();
     }
 }

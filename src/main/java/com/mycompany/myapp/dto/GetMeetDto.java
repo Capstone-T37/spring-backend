@@ -22,4 +22,6 @@ public class GetMeetDto extends MeetBaseDto {
 
     @NotNull
     private Boolean isRequestSent;
+
+    private String imageUrl;
 }

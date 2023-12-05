@@ -273,6 +273,7 @@ public class MeetResource {
                     .description(meet.getDescription())
                     .isEnabled(meet.getIsEnabled())
                     .isRequestSent(requestRepository.existsByUserAndMeet(user, meet))
+                    .imageUrl(user.getImageUrl())
                     .build()
             );
     }

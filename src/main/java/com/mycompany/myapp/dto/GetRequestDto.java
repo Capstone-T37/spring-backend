@@ -15,4 +15,6 @@ public class GetRequestDto {
 
     @NotNull
     private String userName;
+
+    private String imageUrl;
 }

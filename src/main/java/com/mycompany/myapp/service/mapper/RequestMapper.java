@@ -10,6 +10,11 @@ import org.springframework.stereotype.Service;
 public class RequestMapper {
 
     public static GetRequestDto fromEntity(Request request) {
-        return GetRequestDto.builder().id(request.getId()).userName(request.getUser().getLogin()).build();
+        return GetRequestDto
+            .builder()
+            .id(request.getId())
+            .userName(request.getUser().getLogin())
+            .imageUrl(request.getUser().getImageUrl())
+            .build();
     }
 }

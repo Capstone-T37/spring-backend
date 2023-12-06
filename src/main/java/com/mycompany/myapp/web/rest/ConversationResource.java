@@ -1,13 +1,19 @@
 package com.mycompany.myapp.web.rest;
 
 import com.mycompany.myapp.domain.Conversation;
+import com.mycompany.myapp.domain.User;
+import com.mycompany.myapp.dto.CreateConversationDto;
+import com.mycompany.myapp.dto.GetConversationDto;
+import com.mycompany.myapp.dto.GetParticipantDto;
 import com.mycompany.myapp.repository.ConversationRepository;
+import com.mycompany.myapp.service.UserService;
 import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import org.slf4j.Logger;
@@ -41,29 +47,36 @@ public class ConversationResource {
     private String applicationName;
 
     private final ConversationRepository conversationRepository;
+    private final UserService userService;
 
-    public ConversationResource(ConversationRepository conversationRepository) {
+    public ConversationResource(ConversationRepository conversationRepository, UserService userService) {
         this.conversationRepository = conversationRepository;
+        this.userService = userService;
     }
 
     /**
      * {@code POST  /conversations} : Create a new conversation.
      *
-     * @param conversation the conversation to create.
+     * @param dto the conversation to create.
      * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new conversation, or with status {@code 400 (Bad Request)} if the conversation has already an ID.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("/conversations")
-    public ResponseEntity<Conversation> createConversation(@Valid @RequestBody Conversation conversation) throws URISyntaxException {
-        log.debug("REST request to save Conversation : {}", conversation);
-        if (conversation.getId() != null) {
-            throw new BadRequestAlertException("A new conversation cannot already have an ID", ENTITY_NAME, "idexists");
+    public ResponseEntity createConversation(@Valid @RequestBody CreateConversationDto dto) throws URISyntaxException {
+        log.debug("REST request to save Conversation : {}", dto);
+        Optional<User> user = userService.getUserWithAuthorities();
+        if (user.isEmpty()) {
+            throw new IllegalCallerException("No user is logged in");
         }
-        Conversation result = conversationRepository.save(conversation);
-        return ResponseEntity
-            .created(new URI("/api/conversations/" + result.getId()))
-            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
-            .body(result);
+        Optional<User> otherUser = userService.getUserWithAuthoritiesByLogin(dto.getUserName());
+        if (otherUser.isEmpty()) {
+            throw new BadRequestAlertException("invalid userName", ENTITY_NAME, "userName doesnt exist");
+        }
+        if (conversationRepository.findByUsersContains(otherUser.get()).isPresent()) {
+            return ResponseEntity.ok().build();
+        }
+        Conversation result = conversationRepository.save(Conversation.builder().users(Set.of(user.get(), otherUser.get())).build());
+        return ResponseEntity.created(new URI("/api/conversations/" + result.getId())).build();
     }
 
     /**
@@ -164,6 +177,29 @@ public class ConversationResource {
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
 
+    @GetMapping("/conversations/users")
+    public ResponseEntity<List<GetConversationDto>> getAllUsersWithConversations(
+        @org.springdoc.api.annotations.ParameterObject Pageable pageable,
+        @RequestParam(required = false, defaultValue = "false") boolean eagerload
+    ) {
+        log.debug("REST request to get a page of Conversations");
+        Optional<User> user = userService.getUserWithAuthorities();
+        if (user.isEmpty()) {
+            throw new IllegalCallerException("No user is logged in");
+        }
+        Page<GetConversationDto> page;
+        page =
+            conversationRepository
+                .findAllByUsersContains(pageable, user.get())
+                .map(e -> {
+                    User other = findOtherUser(e.getUsers(), user.get());
+                    return GetConversationDto.builder().id(e.getId()).userName(other.getLogin()).imageUrl(other.getImageUrl()).build();
+                });
+
+        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
+        return ResponseEntity.ok().headers(headers).body(page.getContent());
+    }
+
     /**
      * {@code GET  /conversations/:id} : get the "id" conversation.
      *
@@ -191,5 +227,19 @@ public class ConversationResource {
             .noContent()
             .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))
             .build();
+    }
+
+    private User findOtherUser(Set<User> users, User user) {
+        if (users == null || user == null) {
+            return null;
+        }
+
+        for (User otherUser : users) {
+            if (!otherUser.equals(user)) {
+                return otherUser;
+            }
+        }
+
+        return null; // Return null if no other user is found
     }
 }

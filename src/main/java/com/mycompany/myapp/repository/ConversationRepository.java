@@ -1,6 +1,7 @@
 package com.mycompany.myapp.repository;
 
 import com.mycompany.myapp.domain.Conversation;
+import com.mycompany.myapp.domain.User;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -28,4 +29,8 @@ public interface ConversationRepository extends ConversationRepositoryWithBagRel
     default Page<Conversation> findAllWithEagerRelationships(Pageable pageable) {
         return this.fetchBagRelationships(this.findAll(pageable));
     }
+
+    Page<Conversation> findAllByUsersContains(Pageable pageable, User user);
+
+    Optional<Conversation> findByUsersContains(User user);
 }

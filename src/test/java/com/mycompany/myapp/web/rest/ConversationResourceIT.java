@@ -9,11 +9,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.mycompany.myapp.IntegrationTest;
 import com.mycompany.myapp.domain.Conversation;
 import com.mycompany.myapp.domain.User;
+import com.mycompany.myapp.dto.CreateConversationDto;
 import com.mycompany.myapp.repository.ConversationRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -102,7 +104,18 @@ class ConversationResourceIT {
         int databaseSizeBeforeCreate = conversationRepository.findAll().size();
         // Create the Conversation
         restConversationMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(conversation)))
+            .perform(
+                post(ENTITY_API_URL)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        TestUtil.convertObjectToJsonBytes(
+                            CreateConversationDto
+                                .builder()
+                                .userName(conversation.getUsers().stream().collect(Collectors.toList()).get(0).getLogin())
+                                .build()
+                        )
+                    )
+            )
             .andExpect(status().isCreated());
 
         // Validate the Conversation in the database

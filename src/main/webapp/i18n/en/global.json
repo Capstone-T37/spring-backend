@@ -13,6 +13,7 @@
         "participant": "Participant",
         "tag": "Tag",
         "activityTag": "Activity Tag",
+        "conversation": "Conversation",
         "jhipster-needle-menu-add-entry": "JHipster will add additional entities here (do not translate!)"
       },
       "account": {

@@ -34,6 +34,11 @@ import { RouterModule } from '@angular/router';
         data: { pageTitle: 'meetupbackendApp.activityTag.home.title' },
         loadChildren: () => import('./activity-tag/activity-tag.module').then(m => m.ActivityTagModule),
       },
+      {
+        path: 'conversation',
+        data: { pageTitle: 'meetupbackendApp.conversation.home.title' },
+        loadChildren: () => import('./conversation/conversation.module').then(m => m.ConversationModule),
+      },
       /* jhipster-needle-add-entity-route - JHipster will add entity modules routes here */
     ]),
   ],

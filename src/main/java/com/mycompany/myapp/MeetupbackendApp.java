@@ -5,11 +5,13 @@ import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.mycompany.myapp.config.ApplicationProperties;
 import com.mycompany.myapp.config.CRLFLogConverter;
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.Optional;
 import javax.annotation.PostConstruct;
@@ -70,11 +72,26 @@ public class MeetupbackendApp {
      * @param args the command line arguments.
      */
     public static void main(String[] args) throws IOException {
-        FileInputStream serviceAccount = new FileInputStream("../test.json");
+        try {
+            String base64Credentials = System.getenv("SERVICE_ACCOUNT_CREDENTIALS");
+            if (base64Credentials == null || base64Credentials.isEmpty()) {
+                throw new IllegalStateException("Service account credentials environment variable not set");
+            }
+            byte[] decodedCredentials = Base64.getDecoder().decode(base64Credentials);
 
-        FirebaseOptions options = new FirebaseOptions.Builder().setCredentials(GoogleCredentials.fromStream(serviceAccount)).build();
-        if (FirebaseApp.getApps().isEmpty()) {
-            FirebaseApp.initializeApp(options);
+            try (ByteArrayInputStream serviceAccountStream = new ByteArrayInputStream(decodedCredentials)) {
+                FirebaseOptions options = new FirebaseOptions.Builder()
+                    .setCredentials(GoogleCredentials.fromStream(serviceAccountStream))
+                    .build();
+
+                if (FirebaseApp.getApps().isEmpty()) {
+                    FirebaseApp.initializeApp(options);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            // Optionally, log the error or handle it as required
+            return;
         }
 
         SpringApplication app = new SpringApplication(MeetupbackendApp.class);

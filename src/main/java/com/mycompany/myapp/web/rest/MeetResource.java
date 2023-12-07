@@ -15,6 +15,7 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import org.slf4j.Logger;
@@ -236,13 +237,23 @@ public class MeetResource {
     @GetMapping("/meets/disable")
     public ResponseEntity<Boolean> disableEnabledMeet() {
         log.debug("REST request to disable enabled meet : {}");
-        Optional<Meet> meet = meetRepository.findByIsEnabledTrue();
+        Optional<User> user = userService.getUserWithAuthorities();
+        if (user.isEmpty()) {
+            throw new IllegalCallerException("No user is logged in");
+        }
+        List<Meet> meet = meetRepository.findByUserAndIsEnabledTrue(user.get());
         if (meet.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        Meet entity = meet.get();
-        entity.setIsEnabled(false);
-        meetRepository.saveAndFlush(entity);
+        meetRepository.saveAllAndFlush(
+            meet
+                .stream()
+                .map(meet1 -> {
+                    meet1.setIsEnabled(false);
+                    return meet1;
+                })
+                .collect(Collectors.toList())
+        );
         return ResponseEntity.ok().body(true);
     }
 

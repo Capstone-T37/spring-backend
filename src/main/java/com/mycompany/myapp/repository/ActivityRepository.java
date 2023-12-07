@@ -1,6 +1,7 @@
 package com.mycompany.myapp.repository;
 
 import com.mycompany.myapp.domain.Activity;
+import com.mycompany.myapp.domain.ActivityTag;
 import com.mycompany.myapp.domain.User;
 import java.util.List;
 import java.util.Optional;
@@ -29,6 +30,8 @@ public interface ActivityRepository extends JpaRepository<Activity, Long> {
     default Page<Activity> findAllWithEagerRelationships(Pageable pageable) {
         return this.findAllWithToOneRelationships(pageable);
     }
+
+    Page<Activity> findByUser(Pageable pageable, User user);
 
     Page<Activity> findByUserNot(Pageable pageable, User user);
 

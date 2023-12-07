@@ -19,6 +19,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import org.hibernate.mapping.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -246,6 +247,21 @@ public class ActivityResource {
         } else {
             page = activityRepository.findByUserNot(pageable, user.get()).map(ActivityMapper::fromEntity);
         }
+        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
+        return ResponseEntity.ok().headers(headers).body(page.getContent());
+    }
+
+    @GetMapping("/activities/own")
+    public ResponseEntity<List<GetActivityDto>> getAllActivitiesByMe(@org.springdoc.api.annotations.ParameterObject Pageable pageable)
+        throws Exception {
+        log.debug("REST request to get a page of Activities");
+        Optional<User> user = userService.getUserWithAuthorities();
+        if (user.isEmpty()) {
+            throw new IllegalCallerException("No user is logged in");
+        }
+        Page<GetActivityDto> page;
+        page = new PageImpl<>(activityRepository.findByUser(pageable, user.get()).map(ActivityMapper::fromEntity).toList());
+
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }

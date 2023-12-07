@@ -72,7 +72,7 @@ public class ConversationResource {
         if (otherUser.isEmpty()) {
             throw new BadRequestAlertException("invalid userName", ENTITY_NAME, "userName doesnt exist");
         }
-        if (conversationRepository.findByUsersContains(otherUser.get()).isPresent()) {
+        if (conversationRepository.findByBothUsers(otherUser.get(), user.get()).isPresent()) {
             return ResponseEntity.ok().build();
         }
         Conversation result = conversationRepository.save(Conversation.builder().users(Set.of(user.get(), otherUser.get())).build());

@@ -32,5 +32,6 @@ public interface ConversationRepository extends ConversationRepositoryWithBagRel
 
     Page<Conversation> findAllByUsersContains(Pageable pageable, User user);
 
-    Optional<Conversation> findByUsersContains(User user);
+    @Query("SELECT c FROM Conversation c WHERE :user1 MEMBER OF c.users AND :user2 MEMBER OF c.users")
+    Optional<Conversation> findByBothUsers(User user1, User user2);
 }
